@@ -1,0 +1,110 @@
+Embeddings y Búsqueda Vectorial
+
+Los embeddings son representaciones numéricas de texto que capturan el significado semántico de las palabras, frases o documentos. En lugar de representar texto como secuencias de caracteres, los embeddings lo convierten en vectores de números en un espacio multidimensional.
+
+¿Qué son los embeddings?
+
+Un embedding es un vector (lista de números) que representa texto. Por ejemplo, la palabra "perro" podría representarse como [0.2, -0.5, 0.8, ...] con cientos o miles de dimensiones. Palabras con significados similares tienen vectores similares.
+
+Propiedades importantes:
+
+1. Similitud semántica: Palabras relacionadas están cerca en el espacio vectorial
+2. Operaciones matemáticas: Se pueden sumar, restar y comparar vectores
+3. Dimensionalidad: Típicamente entre 384 y 1536 dimensiones
+4. Normalización: Los vectores suelen normalizarse para facilitar comparaciones
+
+Modelos de embeddings populares:
+
+- text-embedding-ada-002 (OpenAI): 1536 dimensiones, muy preciso
+- text-embedding-3-small (OpenAI): Más eficiente, menor costo
+- sentence-transformers (Open source): Varios modelos disponibles
+- BERT embeddings: Basados en el modelo BERT de Google
+
+Búsqueda vectorial:
+
+La búsqueda vectorial permite encontrar documentos similares comparando sus embeddings. En lugar de buscar palabras exactas, se buscan significados similares.
+
+Métricas de similitud:
+
+1. Cosine Similarity (Similitud del coseno):
+   - Mide el ángulo entre dos vectores
+   - Rango: -1 a 1 (1 = idénticos)
+   - Más común en RAG
+
+2. Euclidean Distance (Distancia euclidiana):
+   - Mide la distancia directa entre vectores
+   - Menor distancia = mayor similitud
+
+3. Dot Product (Producto punto):
+   - Multiplicación de vectores
+   - Más rápido pero requiere normalización
+
+Bases de datos vectoriales:
+
+Para almacenar y buscar embeddings eficientemente, se usan bases de datos especializadas:
+
+- pgvector: Extensión de PostgreSQL para vectores
+- Pinecone: Base de datos vectorial en la nube
+- Weaviate: Open source, con capacidades de ML
+- Milvus: Diseñada para búsquedas a gran escala
+- Chroma: Ligera, ideal para desarrollo
+- FAISS: Librería de Facebook para búsqueda vectorial
+
+Índices vectoriales:
+
+Para acelerar las búsquedas, se usan estructuras de índice:
+
+1. HNSW (Hierarchical Navigable Small World):
+   - Muy rápido para búsquedas
+   - Usa más memoria
+   - Ideal para producción
+
+2. IVF (Inverted File Index):
+   - Balancea velocidad y precisión
+   - Agrupa vectores similares
+
+3. Flat Index:
+   - Búsqueda exacta pero lenta
+   - Útil para datasets pequeños
+
+Proceso de indexación:
+
+1. Dividir documentos en chunks (fragmentos)
+2. Generar embeddings para cada chunk
+3. Almacenar embeddings en la base vectorial
+4. Crear índices para búsquedas rápidas
+
+Proceso de búsqueda:
+
+1. Convertir la query del usuario en embedding
+2. Buscar los k vectores más similares (top-k)
+3. Recuperar los documentos originales
+4. Retornar resultados ordenados por similitud
+
+Parámetros importantes:
+
+- top-k: Cuántos resultados recuperar (típicamente 3-10)
+- threshold: Umbral mínimo de similitud
+- dimensions: Número de dimensiones del embedding
+
+Optimizaciones:
+
+- Cuantización: Reducir precisión para ahorrar espacio
+- Filtros de metadata: Combinar búsqueda vectorial con filtros
+- Búsqueda híbrida: Combinar búsqueda vectorial con keyword search
+- Re-ranking: Reordenar resultados con un modelo más preciso
+
+Costos y consideraciones:
+
+- Generar embeddings tiene costo (API calls)
+- Almacenar vectores requiere espacio (1536 dims × 4 bytes = 6KB por vector)
+- Búsquedas son rápidas pero requieren recursos computacionales
+- Actualizar embeddings requiere regenerarlos completamente
+
+Mejores prácticas:
+
+1. Cachear embeddings para evitar regenerarlos
+2. Usar batch processing para generar múltiples embeddings
+3. Monitorear la calidad de las búsquedas
+4. Experimentar con diferentes modelos de embeddings
+5. Ajustar top-k según el caso de uso

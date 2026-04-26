@@ -1,0 +1,678 @@
+================================================================================
+    PROYECTO RAG - SISTEMA DE GENERACION AUMENTADA CON RECUPERACION
+    Universidad Mariano Galvez de Guatemala - 2026
+    Inteligencia Articial
+	Repositorio: https://github.com/laraajosee/proyecto-rag-umg
+	Grupo 5
+	Nombres:
+	Jose Manuel Lara Elias			7690-23-19641
+	Marjorie Cabrera 				0909-22-16774
+	Selvin Manolo Estrada Gregorio 	7690-06-124
+	
+================================================================================
+
+TABLA DE CONTENIDOS
+-------------------
+1. Descripcion General del Proyecto
+2. Stack Tecnologico y Dependencias
+3. Infraestructura (Docker Compose)
+4. Esquema de Base de Datos (init.sql)
+5. Configuracion de la Aplicacion (application.yml)
+6. Arquitectura del Sistema
+7. Codigo Fuente - Detalle por Componente
+   7.1 Punto de Entrada (RagApplication.java)
+   7.2 Controlador de Documentos (DocumentController.java)
+   7.3 Controlador de Consultas (QueryController.java)
+   7.4 Servicio de Ingesta (DocumentIngestionService.java)
+   7.5 Servicio RAG (RAGService.java)
+   7.6 Modelo de Solicitud (QueryRequest.java)
+   7.7 Modelo de Respuesta (QueryResponse.java)
+8. Flujo de Datos Completo (Pipeline RAG)
+9. Endpoints de la API REST
+10. Experimentos y Metricas (Sprint 4)
+11. Roadmap y Proximos Pasos
+12. Instrucciones de Despliegue
+
+
+================================================================================
+1. DESCRIPCION GENERAL DEL PROYECTO
+================================================================================
+
+Este proyecto implementa un sistema de Retrieval-Augmented Generation (RAG) 
+desarrollado como proyecto academico en la Universidad Mariano Galvez de 
+Guatemala (UMG), ciclo 2026.
+
+RAG es una arquitectura de inteligencia artificial que combina dos procesos:
+  - RECUPERACION: Busqueda semantica de fragmentos relevantes de documentos 
+    almacenados en una base de datos vectorial.
+  - GENERACION: Un modelo de lenguaje (LLM) genera respuestas fundamentadas
+    en los fragmentos recuperados, citando las fuentes originales.
+
+Objetivo principal: Construir un sistema que responda preguntas basandose
+exclusivamente en documentos PDF propios, eliminando las "alucinaciones" 
+tipicas de los modelos de lenguaje.
+
+
+================================================================================
+2. STACK TECNOLOGICO Y DEPENDENCIAS
+================================================================================
+
+FRAMEWORK PRINCIPAL
+  - Spring Boot 3.2.4
+  - Java 17 (compilacion y ejecucion)
+  - Maven (gestion de dependencias y build)
+
+INTELIGENCIA ARTIFICIAL
+  - Spring AI 1.0.0-M1 (Milestone Release)
+  - spring-ai-ollama-spring-boot-starter (integracion con modelos locales)
+  - spring-ai-pgvector-store-spring-boot-starter (vector store con pgvector)
+  - OpenAI API (generacion de respuestas y embeddings)
+
+BASE DE DATOS
+  - PostgreSQL 16
+  - Extensión pgvector (busqueda vectorial)
+  - Imagen Docker: pgvector/pgvector:pg16
+
+INFRAESTRUCTURA
+  - Docker y Docker Compose (orquestacion de servicios)
+
+DEPENDENCIAS MAVEN (pom.xml):
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-web
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-jdbc
+  - groupId: org.springframework.ai
+    artifactId: spring-ai-ollama-spring-boot-starter
+  - groupId: org.springframework.ai
+    artifactId: spring-ai-pgvector-store-spring-boot-starter
+  - groupId: org.springframework.ai
+    artifactId: spring-ai-pdf-document-reader
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test (scope: test)
+
+REPOSITORIOS MAVEN ADICIONALES:
+  - Spring Milestones: https://repo.spring.io/milestone
+  - Spring Snapshots: https://repo.spring.io/snapshot
+
+BOM (Bill of Materials):
+  - spring-ai-bom version 1.0.0-M1
+
+
+================================================================================
+3. INFRAESTRUCTURA - DOCKER COMPOSE
+================================================================================
+
+Archivo: docker-compose.yml
+
+El proyecto utiliza Docker Compose para levantar la base de datos PostgreSQL
+con la extension pgvector pre-instalada.
+
+SERVICIO: postgres
+  - Imagen: pgvector/pgvector:pg16
+  - Nombre del contenedor: rag-postgres-esencial
+  - Puerto expuesto: 5434 (host) -> 5432 (contenedor)
+  - Variables de entorno:
+      POSTGRES_DB: rag_db
+      POSTGRES_USER: raguser
+      POSTGRES_PASSWORD: ragpass123
+  - Volumen de inicializacion: ./init.sql -> /docker-entrypoint-initdb.d/init.sql
+  - Volumen de datos: pgdata:/var/lib/postgresql/data
+  - Healthcheck:
+      Comando: pg_isready -U raguser -d rag_db
+      Intervalo: 10s
+      Timeout: 5s
+      Reintentos: 5
+  - Restart: unless-stopped
+
+VOLUMEN PERSISTENTE:
+  - pgdata (almacena datos de PostgreSQL entre reinicios)
+
+COMANDO DE INICIO:
+  docker-compose up -d
+
+COMANDO DE VERIFICACION:
+  docker ps  (debe mostrar rag-postgres-esencial como healthy)
+
+
+================================================================================
+4. ESQUEMA DE BASE DE DATOS (init.sql)
+================================================================================
+
+Archivo: init.sql
+
+Este script SQL se ejecuta automaticamente al inicializar el contenedor
+PostgreSQL por primera vez.
+
+EXTENSION:
+  CREATE EXTENSION IF NOT EXISTS vector;
+  -- Habilita el tipo de dato 'vector' y las funciones de busqueda vectorial
+
+TABLA PRINCIPAL: vector_store
+  Campos:
+    - id         UUID          PRIMARY KEY  DEFAULT gen_random_uuid()
+    - content    TEXT                        -- Contenido del chunk de texto
+    - metadata   JSONB                      -- Metadatos: fuente, chunk_index, etc.
+    - embedding  VECTOR(768)                -- Vector de embedding (768 dimensiones)
+
+INDICE DE BUSQUEDA VECTORIAL:
+  CREATE INDEX IF NOT EXISTS vector_store_embedding_idx 
+  ON vector_store 
+  USING ivfflat (embedding vector_cosine_ops) 
+  WITH (lists = 100);
+
+  Detalles del indice:
+    - Tipo: IVFFlat (Inverted File Flat)
+    - Operador: vector_cosine_ops (similitud coseno)
+    - Listas: 100 (particiones para busqueda aproximada)
+    - Proposito: Acelerar busquedas de similitud semantica
+
+TABLA DE METRICAS: evaluation_metrics
+  Campos:
+    - id              SERIAL    PRIMARY KEY
+    - experiment_name VARCHAR(100)     -- Nombre del experimento
+    - query_text      TEXT             -- Consulta evaluada
+    - precision_score DOUBLE PRECISION -- Precision del resultado
+    - recall_score    DOUBLE PRECISION -- Recall del resultado
+    - latency_ms      BIGINT           -- Latencia en milisegundos
+    - top_k           INTEGER          -- Numero de chunks recuperados
+    - chunk_size      INTEGER          -- Tamano del chunk utilizado
+    - created_at      TIMESTAMP        DEFAULT CURRENT_TIMESTAMP
+
+CONSULTA DE METRICAS PROMEDIO:
+  SELECT experiment_name, 
+         AVG(precision_score) AS avg_precision,
+         AVG(recall_score) AS avg_recall, 
+         AVG(latency_ms) AS avg_latency
+  FROM evaluation_metrics 
+  GROUP BY experiment_name;
+
+
+================================================================================
+5. CONFIGURACION DE LA APLICACION
+================================================================================
+
+Archivo: src/main/resources/application.yml
+
+SERVIDOR:
+  Puerto: 8081
+
+SPRING DATASOURCE:
+  URL: jdbc:postgresql://localhost:5434/rag_db
+  Username: raguser
+  Password: ragpass123
+  Driver: org.postgresql.Driver
+
+SPRING AI - OPENAI:
+  API Key: configurada via variable de entorno ${OPENAI_API_KEY}
+  
+  Chat:
+    Modelo: gpt-4o-mini
+    Temperatura: 0.3 (respuestas mas deterministicas/precisas)
+  
+  Embedding:
+    Modelo: text-embedding-3-small
+
+SPRING AI - VECTORSTORE (pgvector):
+  Inicializar esquema: true (crea tablas automaticamente si no existen)
+
+CONFIGURACION RAG PERSONALIZADA:
+  rag.chunk-size: 500  (tamano de cada fragmento en caracteres)
+  rag.top-k: 3         (numero de fragmentos a recuperar por consulta)
+
+LOGGING:
+  Nivel para com.rag: DEBUG
+
+
+================================================================================
+6. ARQUITECTURA DEL SISTEMA
+================================================================================
+
+El sistema sigue la arquitectura RAG (Retrieval-Augmented Generation) con
+el siguiente flujo:
+
+FLUJO DE INGESTA (Carga de documentos):
+  [PDFs] -> [DocumentIngestionService] -> [Chunking] -> [OpenAI Embeddings] -> [pgvector]
+
+  1. Los archivos PDF se colocan en: src/main/resources/documents/
+  2. El servicio de ingesta lee cada PDF
+  3. Los documentos se dividen en fragmentos (chunks) de tamano configurable
+  4. Cada chunk se convierte en un vector de 768 dimensiones via OpenAI
+  5. Los vectores se almacenan en la tabla vector_store de PostgreSQL
+
+FLUJO DE CONSULTA (Preguntas del usuario):
+  [Query] -> [QueryController] -> [RAGService] -> [pgvector Search] -> [OpenAI GPT] -> [Response]
+
+  1. El usuario envia una pregunta via POST /api/query
+  2. La pregunta se convierte en un vector de embedding
+  3. Se buscan los top-K chunks mas similares en pgvector (similitud coseno)
+  4. Los chunks recuperados se envian como contexto al LLM (GPT-4o-mini)
+  5. El LLM genera una respuesta fundamentada en los chunks
+  6. Se retorna la respuesta con fuentes, evidencia y latencia
+
+CAPAS DE LA APLICACION:
+  +-------------------------------------------+
+  |           API REST (Controllers)          |
+  |  DocumentController  |  QueryController   |
+  +-------------------------------------------+
+  |              Services                     |
+  |  DocumentIngestionService | RAGService    |
+  +-------------------------------------------+
+  |              Models                       |
+  |    QueryRequest    |    QueryResponse     |
+  +-------------------------------------------+
+  |          Spring AI Framework              |
+  |   VectorStore  |  ChatClient  | Embeddings|
+  +-------------------------------------------+
+  |         Infrastructure                    |
+  |     PostgreSQL + pgvector  |  OpenAI API  |
+  +-------------------------------------------+
+
+
+================================================================================
+7. CODIGO FUENTE - DETALLE POR COMPONENTE
+================================================================================
+
+Paquete base: com.rag
+
+Estructura de directorios:
+  src/main/java/com/rag/
+    |-- RagApplication.java           (Punto de entrada)
+    |-- controller/
+    |   |-- DocumentController.java   (API de ingesta)
+    |   |-- QueryController.java      (API de consultas)
+    |-- service/
+    |   |-- DocumentIngestionService.java  (Logica de ingesta)
+    |   |-- RAGService.java               (Logica RAG)
+    |-- model/
+    |   |-- QueryRequest.java         (DTO de solicitud)
+    |   |-- QueryResponse.java        (DTO de respuesta)
+  src/main/resources/
+    |-- application.yml               (Configuracion)
+    |-- documents/                    (Directorio para PDFs)
+
+
+--------------------------------------------------------------------------------
+7.1 PUNTO DE ENTRADA: RagApplication.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag
+Anotacion: @SpringBootApplication
+Metodo: main(String[] args)
+  - Ejecuta SpringApplication.run(RagApplication.class, args)
+  - Inicia el contenedor Spring Boot y todos los componentes auto-configurados
+  - Habilita auto-configuracion de Spring AI (pgvector, OpenAI)
+
+
+--------------------------------------------------------------------------------
+7.2 CONTROLADOR DE DOCUMENTOS: DocumentController.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.controller
+Anotaciones: @RestController, @RequestMapping("/api/documents")
+
+Dependencia inyectada:
+  - DocumentIngestionService ingestionService
+
+Endpoint:
+  POST /api/documents/ingest
+  - Retorna: Map<String, String>
+  - Llama a ingestionService.ingestDocuments()
+  - Respuesta exitosa: {"status": "Documents ingested successfully"}
+  - Respuesta error: {"status": "Error ingesting documents", "error": mensaje}
+
+Funcionamiento:
+  1. Recibe solicitud HTTP POST sin body
+  2. Delega al servicio de ingesta
+  3. Retorna confirmacion o error con detalle
+
+
+--------------------------------------------------------------------------------
+7.3 CONTROLADOR DE CONSULTAS: QueryController.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.controller
+Anotaciones: @RestController, @RequestMapping("/api")
+
+Dependencia inyectada:
+  - RAGService ragService
+
+Endpoint:
+  POST /api/query
+  - Recibe: @RequestBody QueryRequest (JSON con query y topK)
+  - Retorna: QueryResponse
+  - Llama a ragService.query(request.getQuery(), request.getTopK())
+
+Funcionamiento:
+  1. Recibe JSON con la pregunta del usuario y parametro topK
+  2. Delega al servicio RAG la busqueda y generacion
+  3. Retorna respuesta completa con answer, sources, hasEvidence, latencyMs
+
+
+--------------------------------------------------------------------------------
+7.4 SERVICIO DE INGESTA: DocumentIngestionService.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.service
+Anotaciones: @Service
+
+Dependencias inyectadas:
+  - VectorStore vectorStore (Spring AI - almacen vectorial)
+  - @Value("${rag.chunk-size}") int chunkSize
+
+Metodo principal: ingestDocuments()
+  1. Lee archivos PDF desde src/main/resources/documents/
+  2. Utiliza el PDF Document Reader de Spring AI para extraer texto
+  3. Divide el texto en chunks del tamano configurado (rag.chunk-size)
+  4. Cada chunk se convierte en un Document de Spring AI con metadatos
+  5. Los documentos se almacenan en el VectorStore (pgvector)
+     - Spring AI genera automaticamente los embeddings via OpenAI
+     - Los vectores se insertan en la tabla vector_store
+
+Parametros configurables:
+  - rag.chunk-size: Tamano de cada fragmento (default: 500 caracteres)
+
+
+--------------------------------------------------------------------------------
+7.5 SERVICIO RAG: RAGService.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.service
+Anotaciones: @Service
+
+Dependencias inyectadas:
+  - VectorStore vectorStore
+  - ChatClient.Builder chatClientBuilder (Spring AI - cliente del LLM)
+  - @Value("${rag.top-k}") int defaultTopK
+
+Metodo principal: query(String query, Integer topK)
+  Retorna: QueryResponse
+
+Flujo:
+  1. Determina el valor de topK (usa el proporcionado o el default)
+  2. Registra el timestamp de inicio para medir latencia
+  3. Configura la busqueda de similitud:
+     - SearchRequest con la query del usuario
+     - Limita a topK resultados
+  4. Ejecuta busqueda en VectorStore (pgvector)
+     - Convierte la query en embedding automaticamente
+     - Busca los vectores mas similares por distancia coseno
+  5. Extrae los documentos recuperados con su contenido y metadatos
+  6. Construye el prompt para el LLM:
+     - System prompt: instrucciones para responder basandose SOLO en el contexto
+     - User prompt: la pregunta del usuario + los chunks recuperados como contexto
+  7. Envia al LLM (GPT-4o-mini via OpenAI API)
+  8. Recibe la respuesta generada
+  9. Calcula la latencia total en milisegundos
+  10. Construye y retorna QueryResponse con:
+      - answer: respuesta del LLM
+      - sources: lista de fuentes con content y metadata
+      - hasEvidence: true si se encontraron chunks relevantes
+      - latencyMs: tiempo total de procesamiento
+
+Prompt del sistema (concepto):
+  "Responde la pregunta basandote UNICAMENTE en el contexto proporcionado.
+   Si la informacion no esta en el contexto, indica que no tienes suficiente
+   informacion. Cita las fuentes relevantes."
+
+
+--------------------------------------------------------------------------------
+7.6 MODELO DE SOLICITUD: QueryRequest.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.model
+
+Campos:
+  - String query   -- La pregunta del usuario en lenguaje natural
+  - Integer topK   -- Numero de chunks a recuperar (opcional, usa default si null)
+
+Metodos: Getters y Setters
+
+Ejemplo de JSON de entrada:
+  {
+    "query": "Que es la inteligencia artificial?",
+    "topK": 5
+  }
+
+
+--------------------------------------------------------------------------------
+7.7 MODELO DE RESPUESTA: QueryResponse.java
+--------------------------------------------------------------------------------
+
+Paquete: com.rag.model
+
+Campos:
+  - String answer           -- Respuesta generada por el LLM
+  - List<Source> sources     -- Lista de fuentes utilizadas
+  - boolean hasEvidence      -- Indica si se encontro evidencia en los documentos
+  - long latencyMs           -- Tiempo de procesamiento en milisegundos
+
+Clase interna: Source
+  - String content           -- Contenido del chunk recuperado
+  - Map<String, Object> metadata  -- Metadatos (nombre del PDF, chunk_index, etc.)
+
+Metodos: Getters, Setters, Constructor
+
+Ejemplo de JSON de salida:
+  {
+    "answer": "La inteligencia artificial es...",
+    "sources": [
+      {
+        "content": "Fragmento del documento original...",
+        "metadata": {
+          "source": "documento.pdf",
+          "chunk_index": 3
+        }
+      }
+    ],
+    "hasEvidence": true,
+    "latencyMs": 1245
+  }
+
+
+================================================================================
+8. FLUJO DE DATOS COMPLETO (PIPELINE RAG)
+================================================================================
+
+FASE 1: INGESTA DE DOCUMENTOS
+------------------------------
+Paso 1: Colocar PDFs en src/main/resources/documents/
+Paso 2: Llamar POST /api/documents/ingest
+Paso 3: DocumentIngestionService lee cada PDF
+Paso 4: El texto se divide en chunks de 500 caracteres (configurable)
+Paso 5: Cada chunk se envia a OpenAI text-embedding-3-small
+Paso 6: Se recibe un vector de 768 dimensiones por chunk
+Paso 7: El vector, contenido y metadatos se insertan en vector_store
+Paso 8: El indice IVFFlat se actualiza para busquedas rapidas
+
+FASE 2: CONSULTA Y GENERACION
+------------------------------
+Paso 1: Usuario envia POST /api/query con {"query": "...", "topK": 3}
+Paso 2: QueryController recibe y delega a RAGService
+Paso 3: La query se convierte en embedding (misma dimension: 768)
+Paso 4: pgvector busca los top-K vectores mas similares (cosine similarity)
+Paso 5: Se recuperan los chunks con su contenido y metadatos
+Paso 6: Se construye el prompt:
+         - Contexto: contenido de los chunks recuperados
+         - Pregunta: la query original del usuario
+         - Instrucciones: responder SOLO con base en el contexto
+Paso 7: Se envia a GPT-4o-mini (temperatura 0.3)
+Paso 8: El LLM genera una respuesta citando las fuentes
+Paso 9: Se construye QueryResponse con answer, sources, hasEvidence, latencyMs
+Paso 10: Se retorna al usuario como JSON
+
+
+================================================================================
+9. ENDPOINTS DE LA API REST
+================================================================================
+
+BASE URL: http://localhost:8081/api
+
+ENDPOINT 1: Ingesta de Documentos
+  Metodo:  POST
+  Ruta:    /api/documents/ingest
+  Body:    (ninguno)
+  Headers: Content-Type: application/json
+
+  Respuesta exitosa (200 OK):
+    {"status": "Documents ingested successfully"}
+
+  Respuesta error (200 con error):
+    {"status": "Error ingesting documents", "error": "detalle del error"}
+
+  Ejemplo con curl:
+    curl -X POST http://localhost:8081/api/documents/ingest
+
+ENDPOINT 2: Consulta RAG
+  Metodo:  POST
+  Ruta:    /api/query
+  Body:    JSON con campos query (string) y topK (integer, opcional)
+  Headers: Content-Type: application/json
+
+  Respuesta exitosa (200 OK):
+    {
+      "answer": "Respuesta generada por el LLM...",
+      "sources": [
+        {
+          "content": "Texto del chunk...",
+          "metadata": {"source": "archivo.pdf", "chunk_index": 0}
+        }
+      ],
+      "hasEvidence": true,
+      "latencyMs": 1523
+    }
+
+  Ejemplo con curl:
+    curl -X POST http://localhost:8081/api/query \
+      -H "Content-Type: application/json" \
+      -d '{"query": "Que es la inteligencia artificial?", "topK": 5}'
+
+
+================================================================================
+10. EXPERIMENTOS Y METRICAS (SPRINT 4)
+================================================================================
+
+Los experimentos del Sprint 4 evaluan el rendimiento del sistema RAG
+variando parametros clave de configuracion.
+
+EXPERIMENTO 1: Tamano de Chunk (chunk-size)
+  Variable: rag.chunk-size en application.yml
+  Valores probados: 300 vs 500 caracteres
+  Hipotesis: Chunks mas pequenos pueden dar mayor precision pero menos contexto.
+             Chunks mas grandes conservan mejor el contexto pero pueden
+             introducir informacion irrelevante.
+  Metrica: precision_score, recall_score
+
+EXPERIMENTO 2: Top-K Retrieval
+  Variable: rag.top-k en application.yml
+  Valores probados: 3 vs 5
+  Hipotesis: Mayor top-K recupera mas informacion pero puede introducir
+             ruido. Menor top-K es mas preciso pero puede omitir datos.
+  Metrica: precision_score, recall_score, latency_ms
+
+EXPERIMENTO 3: Modelos de Embedding
+  Variable: spring.ai.openai.embedding.options.model en application.yml
+  Valores probados: text-embedding-3-small (y potencialmente otros)
+  Hipotesis: Diferentes modelos de embedding generan representaciones
+             vectoriales de distinta calidad semantica.
+  Metrica: precision_score, recall_score
+
+ALMACENAMIENTO DE METRICAS:
+  Las metricas se almacenan automaticamente en la tabla evaluation_metrics:
+    - experiment_name: identificador del experimento
+    - query_text: la consulta evaluada
+    - precision_score: precision del resultado (0.0 a 1.0)
+    - recall_score: recall del resultado (0.0 a 1.0)
+    - latency_ms: tiempo de respuesta en milisegundos
+    - top_k: parametro top-K usado
+    - chunk_size: tamano de chunk usado
+    - created_at: timestamp del experimento
+
+CONSULTA SQL PARA RESULTADOS:
+  SELECT experiment_name,
+         AVG(precision_score) AS avg_precision,
+         AVG(recall_score) AS avg_recall,
+         AVG(latency_ms) AS avg_latency
+  FROM evaluation_metrics
+  GROUP BY experiment_name;
+
+
+================================================================================
+11. ROADMAP Y PROXIMOS PASOS
+================================================================================
+
+1. ESCALAR BASE DE CONOCIMIENTO
+   - Aumentar de documentos actuales a 30-50 PDFs
+   - Diversificar fuentes para robustecer las respuestas
+   - Probar con documentos de mayor longitud y complejidad
+
+2. INTERFAZ DE USUARIO (UI)
+   - Implementar frontend interactivo con Thymeleaf o React
+   - Permitir consultas en tiempo real desde navegador web
+   - Mostrar fuentes y evidencia de forma visual
+
+3. RE-RANKING
+   - Implementar algoritmo de re-clasificacion post-retrieval
+   - Reordenar chunks por relevancia real antes de enviar al LLM
+   - Mejorar la calidad de las respuestas finales
+
+4. BUSQUEDA HIBRIDA
+   - Combinar busqueda vectorial (semantica) con BM25 (palabras clave)
+   - Capturar tanto similitud semantica como coincidencia lexica
+   - Mejorar recall para consultas con terminos tecnicos especificos
+
+5. MEMORIA DE CONVERSACION
+   - Mantener contexto entre preguntas del mismo usuario
+   - Permitir dialogos naturales multi-turno
+   - Implementar historial de conversacion con ventana de contexto
+
+
+================================================================================
+12. INSTRUCCIONES DE DESPLIEGUE
+================================================================================
+
+PRERREQUISITOS:
+  - Java 17 o superior instalado
+  - Docker y Docker Compose instalados
+  - API Key de OpenAI configurada
+
+PASO 1: Clonar el repositorio
+  git clone https://github.com/laraajosee/proyecto-rag-umg.git
+  cd proyecto-rag-umg
+
+PASO 2: Configurar variable de entorno
+  export OPENAI_API_KEY="tu-api-key-aqui"
+
+PASO 3: Levantar la base de datos
+  docker-compose up -d
+  (Esperar a que el healthcheck confirme estado 'healthy')
+
+PASO 4: Verificar que PostgreSQL esta listo
+  docker ps
+  (El contenedor rag-postgres-esencial debe estar 'healthy')
+
+PASO 5: Colocar documentos PDF
+  Copiar archivos PDF a: src/main/resources/documents/
+
+PASO 6: Compilar y ejecutar la aplicacion
+  ./mvnw spring-boot:run
+  (La aplicacion inicia en http://localhost:8081)
+
+PASO 7: Ingestar documentos
+  curl -X POST http://localhost:8081/api/documents/ingest
+
+PASO 8: Realizar consultas
+  curl -X POST http://localhost:8081/api/query \
+    -H "Content-Type: application/json" \
+    -d '{"query": "Tu pregunta aqui", "topK": 3}'
+
+VERIFICACION:
+  - La respuesta debe incluir "hasEvidence": true
+  - Las fuentes deben citar los PDFs ingresados
+  - La latencia tipica es de 1000-3000ms
+
+
+================================================================================
+FIN DEL DOCUMENTO
+Generado: 24 de abril de 2026
+Fuente: https://github.com/laraajosee/proyecto-rag-umg
+================================================================================

@@ -1,0 +1,366 @@
+GUÍA DE SOPORTE TÉCNICO - SEGURIDAD EN WINDOWS
+===============================================
+
+PROTECCIÓN Y ELIMINACIÓN DE AMENAZAS
+
+1. TIPOS DE MALWARE
+-------------------
+
+Virus:
+- Se replica y propaga a otros archivos
+- Puede dañar o eliminar datos
+- Requiere ejecución de archivo infectado
+
+Troyanos:
+- Se disfraza como software legítimo
+- Abre puertas traseras para atacantes
+- Roba información personal
+
+Ransomware:
+- Encripta archivos del usuario
+- Exige pago para desencriptar
+- Muy peligroso, difícil de remover
+
+Spyware:
+- Monitorea actividad del usuario
+- Roba contraseñas y datos bancarios
+- Difícil de detectar
+
+Adware:
+- Muestra publicidad no deseada
+- Ralentiza el sistema
+- Puede instalar más malware
+
+Rootkits:
+- Se oculta en el sistema
+- Muy difícil de detectar y remover
+- Acceso completo al sistema
+
+Keyloggers:
+- Registra teclas presionadas
+- Roba contraseñas y datos sensibles
+- Puede ser hardware o software
+
+2. SÍNTOMAS DE INFECCIÓN
+-------------------------
+
+Señales comunes:
+- Sistema muy lento sin razón aparente
+- Programas se abren solos
+- Ventanas emergentes constantes
+- Navegador redirige a sitios extraños
+- Antivirus deshabilitado
+- Archivos desaparecen o se modifican
+- Uso alto de CPU/RAM sin programas abiertos
+- Mensajes de error extraños
+- Iconos desconocidos en escritorio
+- Cambios en página de inicio del navegador
+
+Verificación:
+- Administrador de tareas: Procesos sospechosos
+- Programas instalados: Software desconocido
+- Extensiones del navegador: Extensiones no instaladas por ti
+- Servicios: Servicios desconocidos ejecutándose
+- Inicio: Programas sospechosos al arranque
+
+3. PREVENCIÓN DE MALWARE
+-------------------------
+
+Mejores prácticas:
+
+Antivirus:
+- Mantener Windows Defender activo
+- O usar antivirus de terceros (Bitdefender, Kaspersky, Norton)
+- Actualizar definiciones diariamente
+- Escaneo completo semanal
+
+Actualizaciones:
+- Activar Windows Update automático
+- Actualizar todos los programas regularmente
+- Actualizar navegadores
+- Actualizar Java, Adobe Reader, etc.
+
+Navegación segura:
+- No hacer click en enlaces sospechosos
+- Verificar URL antes de ingresar datos
+- Usar HTTPS siempre que sea posible
+- No descargar de sitios no confiables
+- Verificar certificados SSL
+
+Email:
+- No abrir adjuntos de remitentes desconocidos
+- Verificar dirección del remitente
+- Desconfiar de urgencias o premios
+- No hacer click en enlaces de emails sospechosos
+
+Descargas:
+- Solo descargar de sitios oficiales
+- Verificar firma digital de archivos
+- Escanear con antivirus antes de ejecutar
+- Leer permisos que solicita el instalador
+
+Contraseñas:
+- Usar contraseñas únicas y fuertes
+- Mínimo 12 caracteres
+- Combinar mayúsculas, minúsculas, números, símbolos
+- Usar administrador de contraseñas (Bitwarden, 1Password)
+- Activar autenticación de dos factores (2FA)
+
+4. ESCANEO Y DETECCIÓN
+----------------------
+
+Windows Defender:
+- Seguridad de Windows > Protección contra virus y amenazas
+- Examen rápido: 5-10 minutos
+- Examen completo: 1-2 horas
+- Examen personalizado: Carpetas específicas
+- Examen sin conexión: Para malware persistente
+
+Malwarebytes (recomendado):
+- Descargar de malwarebytes.com
+- Instalar versión gratuita
+- Ejecutar escaneo completo
+- Eliminar amenazas detectadas
+- Reiniciar si es necesario
+
+AdwCleaner:
+- Especializado en adware y PUPs
+- Descargar de malwarebytes.com/adwcleaner
+- Ejecutar escaneo
+- Eliminar elementos detectados
+- Limpiar navegadores
+
+HitmanPro:
+- Escaneo de segunda opinión
+- Usa múltiples motores antivirus
+- Detecta rootkits
+- Versión de prueba gratuita
+
+Kaspersky Virus Removal Tool:
+- Herramienta gratuita de escaneo
+- No requiere instalación
+- Actualiza definiciones automáticamente
+
+5. ELIMINACIÓN DE MALWARE
+--------------------------
+
+Proceso paso a paso:
+
+Paso 1: Desconectar de internet
+- Desactivar WiFi o desconectar cable Ethernet
+- Evita que malware se comunique con servidores
+
+Paso 2: Iniciar en Modo Seguro con Red
+- Reiniciar PC
+- Presionar F8 o Shift+F8 durante arranque
+- Seleccionar "Modo seguro con funciones de red"
+
+Paso 3: Desinstalar programas sospechosos
+- Panel de control > Programas > Desinstalar
+- Ordenar por fecha de instalación
+- Desinstalar programas desconocidos recientes
+- Usar Revo Uninstaller para limpieza profunda
+
+Paso 4: Eliminar extensiones del navegador
+Chrome:
+- Menú > Extensiones > Administrar extensiones
+- Eliminar extensiones sospechosas
+
+Firefox:
+- Menú > Complementos > Extensiones
+- Eliminar extensiones sospechosas
+
+Edge:
+- Menú > Extensiones
+- Eliminar extensiones sospechosas
+
+Paso 5: Restablecer navegadores
+Chrome:
+- Configuración > Restablecer configuración
+- Restablecer configuración a sus valores predeterminados
+
+Firefox:
+- about:support > Restablecer Firefox
+
+Edge:
+- Configuración > Restablecer configuración
+
+Paso 6: Escanear con múltiples herramientas
+- Windows Defender: Examen completo
+- Malwarebytes: Escaneo completo
+- AdwCleaner: Escaneo y limpieza
+- HitmanPro: Escaneo de segunda opinión
+
+Paso 7: Verificar tareas programadas
+- taskschd.msc
+- Buscar tareas sospechosas
+- Eliminar tareas desconocidas
+
+Paso 8: Verificar servicios
+- services.msc
+- Buscar servicios sospechosos
+- Deshabilitar servicios desconocidos
+
+Paso 9: Verificar inicio de Windows
+- msconfig > Inicio
+- Deshabilitar programas sospechosos
+- O usar Autoruns de Sysinternals
+
+Paso 10: Limpiar archivos temporales
+- Ejecutar Liberador de espacio en disco
+- Eliminar archivos temporales
+- Vaciar papelera de reciclaje
+
+6. RANSOMWARE
+-------------
+
+Prevención:
+- Backup regular de datos importantes (3-2-1 rule)
+- No abrir adjuntos sospechosos
+- Mantener Windows actualizado
+- Usar antivirus con protección anti-ransomware
+- Deshabilitar macros en Office
+
+Si estás infectado:
+1. NO PAGAR el rescate (no garantiza recuperación)
+2. Desconectar de red inmediatamente
+3. Identificar variante de ransomware
+4. Buscar herramienta de desencriptación en nomoreransom.org
+5. Restaurar desde backup si está disponible
+6. Formatear e instalar limpio si no hay backup
+
+Herramientas de desencriptación:
+- No More Ransom Project: nomoreransom.org
+- Kaspersky: Herramientas gratuitas de desencriptación
+- Avast: Herramientas de desencriptación
+
+7. PHISHING Y INGENIERÍA SOCIAL
+--------------------------------
+
+Señales de phishing:
+- Errores ortográficos y gramaticales
+- Urgencia o amenazas
+- Solicitud de información personal
+- Enlaces sospechosos
+- Remitente desconocido o falso
+- Ofertas demasiado buenas
+
+Verificación de emails:
+- Verificar dirección del remitente completa
+- Pasar mouse sobre enlaces sin hacer click
+- Verificar dominio del enlace
+- Buscar el mensaje en Google (puede ser scam conocido)
+
+Protección:
+- No hacer click en enlaces de emails no solicitados
+- Ir directamente al sitio web escribiendo la URL
+- Verificar certificado SSL del sitio
+- Usar autenticación de dos factores
+- Reportar emails de phishing
+
+8. FIREWALL Y PROTECCIÓN DE RED
+--------------------------------
+
+Firewall de Windows:
+- Mantener siempre activado
+- Configuración > Actualización y seguridad > Seguridad de Windows > Firewall
+- Verificar que esté activado para redes públicas y privadas
+
+Configuración de red:
+- Usar red "Pública" en WiFi públicos
+- Usar red "Privada" solo en casa
+- Deshabilitar compartir archivos en redes públicas
+- Usar VPN en WiFi públicos
+
+Router:
+- Cambiar contraseña predeterminada
+- Actualizar firmware regularmente
+- Usar WPA3 o WPA2 (nunca WEP)
+- Deshabilitar WPS
+- Ocultar SSID (opcional)
+- Deshabilitar administración remota
+
+9. BACKUP Y RECUPERACIÓN
+-------------------------
+
+Estrategia 3-2-1:
+- 3 copias de datos
+- 2 tipos de medios diferentes
+- 1 copia fuera del sitio
+
+Opciones de backup:
+
+Windows Backup:
+- Configuración > Actualización y seguridad > Copia de seguridad
+- Usar Historial de archivos
+- Crear imagen del sistema
+
+Backup en la nube:
+- OneDrive (incluido con Windows)
+- Google Drive
+- Dropbox
+- Backblaze
+
+Backup local:
+- Disco duro externo
+- NAS (Network Attached Storage)
+- Usar software como Macrium Reflect o Acronis
+
+Frecuencia:
+- Documentos importantes: Diario
+- Fotos y videos: Semanal
+- Imagen del sistema: Mensual
+
+10. HERRAMIENTAS DE SEGURIDAD
+------------------------------
+
+Antivirus:
+- Windows Defender (incluido)
+- Bitdefender Free
+- Kaspersky Free
+- Avast Free
+
+Anti-malware:
+- Malwarebytes
+- AdwCleaner
+- HitmanPro
+- Spybot Search & Destroy
+
+Análisis de archivos:
+- VirusTotal.com: Escaneo con 70+ antivirus
+- Hybrid Analysis: Análisis de comportamiento
+
+Administradores de contraseñas:
+- Bitwarden (gratis, open source)
+- 1Password
+- LastPass
+- KeePass
+
+VPN:
+- ProtonVPN (gratis)
+- Mullvad
+- NordVPN
+- ExpressVPN
+
+Monitoreo:
+- Process Explorer (Sysinternals)
+- Autoruns (Sysinternals)
+- TCPView (Sysinternals)
+
+MEJORES PRÁCTICAS
+-----------------
+1. Mantener Windows y programas actualizados
+2. Usar antivirus y mantenerlo actualizado
+3. Hacer backup regular de datos
+4. Usar contraseñas fuertes y únicas
+5. Activar autenticación de dos factores
+6. No hacer click en enlaces sospechosos
+7. Verificar remitentes de emails
+8. Descargar solo de sitios oficiales
+9. Usar VPN en WiFi públicos
+10. Educar a usuarios sobre amenazas
+11. Limitar privilegios de administrador
+12. Deshabilitar macros en Office por defecto
+13. Usar navegador actualizado
+14. Bloquear ventanas emergentes
+15. Revisar permisos de aplicaciones

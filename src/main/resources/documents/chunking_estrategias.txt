@@ -1,0 +1,160 @@
+Estrategias de Chunking en RAG
+
+El chunking es el proceso de dividir documentos largos en fragmentos más pequeños que puedan ser procesados eficientemente por un sistema RAG. La calidad del chunking tiene un impacto directo en la calidad de las respuestas.
+
+¿Por qué es necesario el chunking?
+
+1. Límites de contexto: Los LLMs tienen límites en cuánto texto pueden procesar
+2. Precisión de búsqueda: Chunks más pequeños permiten recuperar información más específica
+3. Costo: Procesar menos texto reduce el costo de las llamadas al LLM
+4. Relevancia: Chunks bien definidos mejoran la relevancia de los resultados
+
+Estrategias de chunking:
+
+1. Fixed-size chunking (Tamaño fijo):
+   - Divide el texto cada N caracteres o tokens
+   - Ventajas: Simple, predecible
+   - Desventajas: Puede cortar en medio de oraciones o conceptos
+   - Uso típico: chunk_size = 500-1000 caracteres
+
+2. Sentence-based chunking (Por oraciones):
+   - Divide el texto en oraciones completas
+   - Ventajas: Mantiene coherencia gramatical
+   - Desventajas: Oraciones muy cortas o largas
+   - Requiere: Detección de límites de oraciones
+
+3. Paragraph-based chunking (Por párrafos):
+   - Usa párrafos como unidad de chunking
+   - Ventajas: Mantiene ideas completas
+   - Desventajas: Párrafos pueden ser muy largos o cortos
+   - Ideal para: Documentos bien estructurados
+
+4. Semantic chunking (Semántico):
+   - Divide basándose en cambios de tema
+   - Ventajas: Chunks más coherentes
+   - Desventajas: Más complejo, requiere procesamiento adicional
+   - Usa: Modelos de NLP para detectar cambios de tema
+
+5. Recursive chunking (Recursivo):
+   - Intenta dividir por párrafos, luego oraciones, luego caracteres
+   - Ventajas: Balancea coherencia y tamaño
+   - Desventajas: Más complejo de implementar
+   - Usado en: LangChain RecursiveCharacterTextSplitter
+
+Parámetros clave:
+
+1. Chunk size (Tamaño del chunk):
+   - Pequeño (200-300): Más preciso pero puede perder contexto
+   - Mediano (500-800): Balance entre precisión y contexto
+   - Grande (1000-1500): Más contexto pero menos preciso
+   - Recomendación: Empezar con 500 y experimentar
+
+2. Chunk overlap (Solapamiento):
+   - Porcentaje de texto compartido entre chunks consecutivos
+   - Típicamente: 10-20% del chunk size
+   - Ventajas: Evita perder información en los límites
+   - Ejemplo: chunk_size=500, overlap=50
+
+3. Separadores:
+   - Caracteres usados para dividir texto
+   - Comunes: \n\n (párrafos), \n (líneas), . (oraciones)
+   - Orden de prioridad: Párrafos > Oraciones > Palabras
+
+Chunking para diferentes tipos de documentos:
+
+1. Documentos técnicos:
+   - Usar párrafos o secciones
+   - Mantener código completo en un chunk
+   - Preservar títulos y subtítulos
+
+2. Artículos académicos:
+   - Dividir por secciones (Abstract, Introduction, etc.)
+   - Mantener tablas y figuras con su contexto
+   - Preservar referencias
+
+3. Código fuente:
+   - Dividir por funciones o clases
+   - Mantener imports y dependencias
+   - Preservar comentarios con el código
+
+4. Conversaciones/Chat:
+   - Agrupar por turnos de conversación
+   - Mantener contexto de mensajes anteriores
+   - Incluir timestamps
+
+Metadata en chunks:
+
+Cada chunk debe incluir metadata útil:
+
+- source: Nombre del documento original
+- chunk_index: Posición en el documento
+- total_chunks: Total de chunks del documento
+- page_number: Número de página (si aplica)
+- section: Sección del documento
+- author: Autor del documento
+- date: Fecha de creación/modificación
+
+Ejemplo de chunk con metadata:
+
+{
+  "content": "RAG es una técnica que combina...",
+  "metadata": {
+    "source": "documento_rag.pdf",
+    "chunk_index": 0,
+    "total_chunks": 15,
+    "page": 1,
+    "section": "Introducción"
+  }
+}
+
+Evaluación de estrategias de chunking:
+
+Métricas para evaluar:
+
+1. Coherencia: ¿Los chunks tienen sentido por sí solos?
+2. Completitud: ¿Se preserva toda la información?
+3. Relevancia: ¿Los chunks recuperados son útiles?
+4. Tamaño: ¿Los chunks caben en el contexto del LLM?
+
+Experimentos recomendados:
+
+1. Comparar chunk_size: 300 vs 500 vs 800
+2. Probar diferentes overlaps: 0% vs 10% vs 20%
+3. Evaluar estrategias: Fixed vs Semantic vs Recursive
+4. Medir impacto en precision y recall
+
+Mejores prácticas:
+
+1. Empezar simple (fixed-size) y optimizar después
+2. Incluir metadata rica en cada chunk
+3. Preservar estructura del documento (títulos, listas)
+4. Evitar chunks demasiado pequeños (<100 caracteres)
+5. Evitar chunks demasiado grandes (>2000 caracteres)
+6. Usar overlap para evitar pérdida de información
+7. Documentar la estrategia de chunking usada
+8. Monitorear y ajustar basándose en resultados
+
+Herramientas para chunking:
+
+- LangChain: RecursiveCharacterTextSplitter, TokenTextSplitter
+- LlamaIndex: SentenceSplitter, TokenTextSplitter
+- spaCy: Para chunking basado en oraciones
+- NLTK: Para procesamiento de lenguaje natural
+- tiktoken: Para contar tokens de OpenAI
+
+Chunking avanzado:
+
+1. Hierarchical chunking: Crear chunks a múltiples niveles
+2. Sliding window: Ventana deslizante con overlap
+3. Context-aware chunking: Considerar el contexto del documento
+4. Multi-modal chunking: Manejar texto, imágenes, tablas
+5. Adaptive chunking: Ajustar tamaño según el contenido
+
+Errores comunes:
+
+1. Chunks muy pequeños: Pierden contexto
+2. Chunks muy grandes: Dificultan la búsqueda precisa
+3. Sin overlap: Información perdida en los límites
+4. Ignorar estructura: Perder títulos y secciones
+5. No incluir metadata: Dificulta el debugging
+6. No experimentar: Usar valores por defecto sin optimizar

@@ -1,0 +1,66 @@
+pgvector: Extensión de PostgreSQL para Búsqueda Vectorial
+
+pgvector es una extensión de código abierto para PostgreSQL que añade soporte para almacenar y buscar vectores de alta dimensión. Es fundamental para implementar sistemas RAG y búsqueda semántica.
+
+Características principales:
+
+1. Almacenamiento de vectores: Permite crear columnas de tipo vector con dimensiones específicas
+2. Índices especializados: Soporta índices IVFFlat y HNSW para búsqueda rápida
+3. Operadores de distancia: Incluye distancia euclidiana, producto punto y similitud coseno
+4. Integración nativa: Funciona directamente en PostgreSQL sin necesidad de servicios externos
+
+Tipos de índices:
+
+IVFFlat (Inverted File with Flat compression):
+- Divide el espacio vectorial en clusters
+- Búsqueda aproximada más rápida
+- Requiere menos memoria
+- Configuración: lists parameter (típicamente sqrt(rows))
+
+HNSW (Hierarchical Navigable Small World):
+- Grafo jerárquico para búsqueda
+- Mejor precisión que IVFFlat
+- Más rápido en consultas
+- Usa más memoria
+
+Métricas de distancia:
+
+1. Distancia Euclidiana (L2): Distancia geométrica directa entre vectores
+2. Producto Punto: Mide la proyección de un vector sobre otro
+3. Similitud Coseno: Mide el ángulo entre vectores (más común en RAG)
+
+Ejemplo de uso en SQL:
+
+CREATE TABLE embeddings (
+  id SERIAL PRIMARY KEY,
+  content TEXT,
+  embedding vector(1536)
+);
+
+CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops);
+
+SELECT content FROM embeddings 
+ORDER BY embedding <=> '[0.1, 0.2, ...]' 
+LIMIT 5;
+
+Ventajas de pgvector:
+
+- Open source y gratuito
+- Integración con ecosistema PostgreSQL existente
+- No requiere servicios adicionales como Pinecone o Weaviate
+- Transacciones ACID completas
+- Backup y replicación estándar de PostgreSQL
+
+Consideraciones de rendimiento:
+
+- Para datasets grandes (>1M vectores), considerar servicios especializados
+- El tamaño del índice crece con el número de vectores
+- La dimensionalidad afecta el rendimiento (más dimensiones = más lento)
+- Ajustar parámetros del índice según el caso de uso
+
+Casos de uso ideales:
+
+- Prototipos y MVPs de sistemas RAG
+- Aplicaciones con <1M vectores
+- Cuando ya usas PostgreSQL en tu stack
+- Proyectos que requieren transacciones y consistencia

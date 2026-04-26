@@ -1,0 +1,56 @@
+# Archivos compilados
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Variables de entorno (secretos)
+.env
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Dependencias
+node_modules/
+
+# Temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archivos de prueba
+test-output/
+
+# Bases de datos locales
+*.db
+*.sqlite
+
+# Archivos grandes
+*.zip
+*.tar.gz
+*.rar
+
+# Carpetas de build
+build/
+dist/
+out/
