@@ -1,0 +1,176 @@
+GUÍA DE SOPORTE TÉCNICO - WINDOWS 10/11
+=========================================
+
+PROBLEMAS COMUNES Y SOLUCIONES
+
+1. WINDOWS NO INICIA CORRECTAMENTE
+-----------------------------------
+Síntomas: Pantalla negra, bucle de reinicio, error de inicio
+
+Soluciones:
+- Iniciar en Modo Seguro: Presiona F8 o Shift+F8 durante el arranque
+- Usar Reparación Automática: Inserta USB de instalación, selecciona "Reparar el equipo"
+- Restaurar Sistema: Accede a Configuración > Actualización y seguridad > Recuperación
+- Comando SFC: Abre CMD como administrador y ejecuta "sfc /scannow"
+- Comando DISM: Ejecuta "DISM /Online /Cleanup-Image /RestoreHealth"
+
+2. PANTALLA AZUL (BSOD)
+-----------------------
+Códigos comunes:
+- SYSTEM_SERVICE_EXCEPTION: Problema con drivers
+- MEMORY_MANAGEMENT: Fallo en RAM
+- DRIVER_IRQL_NOT_LESS_OR_EQUAL: Driver incompatible
+- PAGE_FAULT_IN_NONPAGED_AREA: Memoria corrupta
+
+Soluciones:
+- Actualizar drivers: Administrador de dispositivos > Actualizar controlador
+- Verificar RAM: Ejecuta "mdsched.exe" para diagnóstico de memoria
+- Desinstalar actualizaciones recientes: Configuración > Windows Update > Ver historial
+- Verificar disco: CMD como admin, ejecuta "chkdsk C: /f /r"
+- Revisar temperatura: Usa HWMonitor para verificar sobrecalentamiento
+
+3. WINDOWS LENTO
+-----------------
+Causas comunes:
+- Disco duro lleno (menos de 10% libre)
+- Muchos programas al inicio
+- Malware o virus
+- Fragmentación del disco
+- Falta de RAM
+
+Soluciones:
+- Liberar espacio: Configuración > Sistema > Almacenamiento > Liberar espacio
+- Desactivar programas de inicio: Ctrl+Shift+Esc > Inicio > Deshabilitar innecesarios
+- Escanear virus: Windows Defender o Malwarebytes
+- Desfragmentar: Busca "Desfragmentar" en el menú inicio
+- Agregar RAM: Mínimo 8GB recomendado para Windows 10/11
+- Deshabilitar efectos visuales: Sistema > Configuración avanzada > Rendimiento
+
+4. NO HAY SONIDO
+----------------
+Verificaciones:
+- Volumen no está en mute (icono de altavoz en barra de tareas)
+- Dispositivo de audio correcto seleccionado
+- Drivers de audio instalados
+
+Soluciones:
+- Ejecutar solucionador: Click derecho en icono de sonido > Solucionar problemas
+- Actualizar drivers: Administrador de dispositivos > Controladores de sonido
+- Reiniciar servicio de audio: services.msc > Windows Audio > Reiniciar
+- Verificar en BIOS: Audio integrado habilitado
+- Reinstalar drivers: Desinstalar en Administrador de dispositivos, reiniciar
+
+5. WIFI NO CONECTA
+------------------
+Diagnóstico:
+- Verificar modo avión desactivado
+- Adaptador WiFi habilitado
+- Router funcionando (otras dispositivos conectan)
+
+Soluciones:
+- Olvidar red y reconectar: Configuración > Red e Internet > WiFi > Administrar redes conocidas
+- Reiniciar adaptador: Administrador de dispositivos > Adaptadores de red > Deshabilitar/Habilitar
+- Actualizar drivers: Descargar del sitio del fabricante
+- Restablecer red: Configuración > Red e Internet > Estado > Restablecimiento de red
+- Cambiar DNS: Propiedades de adaptador > IPv4 > Usar 8.8.8.8 y 8.8.4.4
+- Comando netsh: CMD como admin, ejecuta "netsh winsock reset" y "netsh int ip reset"
+
+6. ACTUALIZACIONES FALLIDAS
+----------------------------
+Errores comunes:
+- 0x80070002: Archivos faltantes
+- 0x80240034: Windows Update dañado
+- 0x8007000E: Memoria insuficiente
+
+Soluciones:
+- Solucionador de Windows Update: Configuración > Actualización y seguridad > Solucionar problemas
+- Limpiar caché: Detener servicio Windows Update, eliminar carpeta C:\Windows\SoftwareDistribution
+- Comando DISM: "DISM /Online /Cleanup-Image /RestoreHealth"
+- Actualización manual: Descargar desde Microsoft Update Catalog
+- Liberar espacio: Mínimo 20GB libres en C:
+
+7. APLICACIONES NO ABREN
+-------------------------
+Síntomas: Aplicación se cierra inmediatamente, error al iniciar
+
+Soluciones:
+- Ejecutar como administrador: Click derecho > Ejecutar como administrador
+- Verificar compatibilidad: Propiedades > Compatibilidad > Ejecutar en modo compatibilidad
+- Reparar aplicación: Configuración > Aplicaciones > Seleccionar app > Opciones avanzadas > Reparar
+- Reinstalar aplicación: Desinstalar completamente y reinstalar
+- Verificar .NET Framework: Instalar última versión desde Microsoft
+- Revisar Visual C++ Redistributables: Instalar todas las versiones
+
+8. IMPRESORA NO FUNCIONA
+-------------------------
+Verificaciones:
+- Impresora encendida y conectada
+- Cable USB o WiFi funcionando
+- Papel y tinta suficientes
+
+Soluciones:
+- Reiniciar cola de impresión: services.msc > Cola de impresión > Reiniciar
+- Eliminar trabajos atascados: Dispositivos e impresoras > Ver cola > Cancelar todos
+- Actualizar drivers: Descargar del sitio del fabricante
+- Agregar impresora manualmente: Configuración > Dispositivos > Impresoras > Agregar
+- Verificar puerto: Propiedades de impresora > Puertos > Verificar puerto correcto
+- Ejecutar solucionador: Configuración > Actualización y seguridad > Solucionar problemas
+
+9. ARCHIVOS ELIMINADOS ACCIDENTALMENTE
+---------------------------------------
+Recuperación:
+- Papelera de reciclaje: Verificar si están ahí, restaurar
+- Historial de archivos: Si estaba habilitado, restaurar versión anterior
+- Restaurar sistema: Si hay punto de restauración reciente
+- Software de recuperación: Recuva, EaseUS Data Recovery
+- Importante: No escribir nuevos datos en el disco
+
+10. PROBLEMAS DE ACTIVACIÓN
+----------------------------
+Errores:
+- 0xC004F074: Servidor no disponible
+- 0xC004C003: Clave ya usada
+- 0x8007007B: Nombre de archivo inválido
+
+Soluciones:
+- Verificar conexión a internet
+- Solucionador de activación: Configuración > Actualización y seguridad > Activación > Solucionar problemas
+- Activación por teléfono: slui.exe 4
+- Verificar clave correcta: Configuración > Sistema > Acerca de
+- Contactar soporte de Microsoft
+
+COMANDOS ÚTILES
+---------------
+- sfc /scannow - Reparar archivos del sistema
+- chkdsk C: /f /r - Verificar y reparar disco
+- DISM /Online /Cleanup-Image /RestoreHealth - Reparar imagen de Windows
+- netsh winsock reset - Restablecer red
+- powercfg /batteryreport - Reporte de batería (laptops)
+- msconfig - Configuración del sistema
+- msinfo32 - Información del sistema
+- devmgmt.msc - Administrador de dispositivos
+- services.msc - Servicios de Windows
+- eventvwr.msc - Visor de eventos
+
+HERRAMIENTAS RECOMENDADAS
+--------------------------
+- CCleaner: Limpieza de archivos temporales
+- Malwarebytes: Eliminación de malware
+- CrystalDiskInfo: Salud del disco duro
+- HWMonitor: Monitoreo de temperatura
+- Speccy: Información detallada del hardware
+- Recuva: Recuperación de archivos
+- TreeSize: Análisis de espacio en disco
+
+MANTENIMIENTO PREVENTIVO
+-------------------------
+1. Actualizar Windows mensualmente
+2. Actualizar drivers cada 3 meses
+3. Escanear virus semanalmente
+4. Limpiar archivos temporales mensualmente
+5. Desfragmentar disco cada 3 meses (HDD)
+6. Verificar espacio libre (mínimo 20% libre)
+7. Hacer backup mensual de datos importantes
+8. Limpiar polvo del hardware cada 6 meses
+9. Verificar temperatura del sistema
+10. Revisar programas de inicio regularmente

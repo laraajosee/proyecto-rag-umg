@@ -1,0 +1,227 @@
+Spring AI Framework
+
+Spring AI es un framework de Spring que simplifica el desarrollo de aplicaciones de inteligencia artificial en Java. Proporciona abstracciones para trabajar con modelos de lenguaje, embeddings, y bases de datos vectoriales.
+
+Características principales:
+
+1. Abstracción de proveedores: Soporta múltiples proveedores de IA (OpenAI, Azure, Anthropic, etc.)
+2. Integración con Spring Boot: Configuración automática y dependency injection
+3. Soporte para RAG: Componentes específicos para sistemas de recuperación
+4. Vector stores: Integración con bases de datos vectoriales
+5. Prompt templates: Sistema de plantillas para prompts
+6. Function calling: Soporte para llamadas a funciones
+
+Componentes principales:
+
+1. ChatClient:
+   - Interfaz para interactuar con modelos de chat
+   - Soporta streaming de respuestas
+   - Manejo de conversaciones con historial
+
+2. EmbeddingClient:
+   - Genera embeddings para texto
+   - Soporta batch processing
+   - Integración con diferentes modelos
+
+3. VectorStore:
+   - Interfaz unificada para bases vectoriales
+   - Operaciones: add, search, delete
+   - Soporta: pgvector, Pinecone, Chroma, Weaviate
+
+4. Document:
+   - Representa un fragmento de texto con metadata
+   - Usado para indexación y recuperación
+
+Configuración básica:
+
+En application.yml:
+
+spring:
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: gpt-3.5-turbo
+          temperature: 0.7
+      embedding:
+        options:
+          model: text-embedding-ada-002
+    
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
+
+Uso del ChatClient:
+
+@Service
+public class ChatService {
+    private final ChatClient chatClient;
+    
+    public ChatService(ChatClient chatClient) {
+        this.chatClient = chatClient;
+    }
+    
+    public String chat(String message) {
+        return chatClient.call(message);
+    }
+}
+
+Uso del VectorStore:
+
+@Service
+public class DocumentService {
+    private final VectorStore vectorStore;
+    private final EmbeddingClient embeddingClient;
+    
+    public void addDocument(String text, Map<String, Object> metadata) {
+        Document doc = new Document(text, metadata);
+        vectorStore.add(List.of(doc));
+    }
+    
+    public List<Document> search(String query, int topK) {
+        return vectorStore.similaritySearch(
+            SearchRequest.query(query).withTopK(topK)
+        );
+    }
+}
+
+Prompt Templates:
+
+Spring AI incluye un sistema de plantillas para construir prompts dinámicos:
+
+String template = """
+    Responde la pregunta basándote en el contexto:
+    
+    Contexto: {context}
+    
+    Pregunta: {question}
+    """;
+
+SystemPromptTemplate promptTemplate = new SystemPromptTemplate(template);
+Message message = promptTemplate.createMessage(
+    Map.of("context", context, "question", question)
+);
+
+Function Calling:
+
+Spring AI soporta function calling para que el LLM pueda llamar funciones Java:
+
+@Bean
+public Function<WeatherRequest, WeatherResponse> weatherFunction() {
+    return request -> {
+        // Lógica para obtener el clima
+        return new WeatherResponse(request.location(), "Soleado", 25);
+    };
+}
+
+Integración con pgvector:
+
+Spring AI se integra nativamente con pgvector:
+
+Dependencias:
+
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
+</dependency>
+
+Configuración automática:
+
+Spring Boot autoconfigura el VectorStore si detecta:
+- Dependencia de pgvector
+- Configuración de datasource
+- EmbeddingClient disponible
+
+Ventajas de Spring AI:
+
+1. Portabilidad: Cambiar de proveedor es fácil
+2. Testabilidad: Fácil de mockear y testear
+3. Configuración: Usa Spring Boot properties
+4. Integración: Se integra con el ecosistema Spring
+5. Mantenimiento: Actualizaciones centralizadas
+
+Proveedores soportados:
+
+- OpenAI: GPT-3.5, GPT-4, embeddings
+- Azure OpenAI: Mismo API que OpenAI
+- Anthropic: Claude models
+- Hugging Face: Modelos open source
+- Ollama: Modelos locales
+- Vertex AI: Google Cloud
+
+Mejores prácticas:
+
+1. Usar dependency injection para todos los clientes
+2. Configurar timeouts y retries
+3. Implementar circuit breakers para APIs externas
+4. Cachear embeddings cuando sea posible
+5. Monitorear costos y uso de APIs
+6. Usar profiles para diferentes entornos
+7. Implementar rate limiting
+
+Ejemplo completo de RAG con Spring AI:
+
+@Service
+public class RAGService {
+    private final VectorStore vectorStore;
+    private final ChatClient chatClient;
+    
+    public String query(String question, int topK) {
+        // 1. Buscar documentos relevantes
+        List<Document> docs = vectorStore.similaritySearch(
+            SearchRequest.query(question).withTopK(topK)
+        );
+        
+        // 2. Construir contexto
+        String context = docs.stream()
+            .map(Document::getContent)
+            .collect(Collectors.joining("\n\n"));
+        
+        // 3. Crear prompt
+        String prompt = String.format("""
+            Contexto: %s
+            
+            Pregunta: %s
+            
+            Responde basándote solo en el contexto.
+            """, context, question);
+        
+        // 4. Generar respuesta
+        return chatClient.call(prompt);
+    }
+}
+
+Manejo de errores:
+
+Spring AI lanza excepciones específicas:
+
+try {
+    String response = chatClient.call(message);
+} catch (OpenAiApiException e) {
+    // Error de la API de OpenAI
+    log.error("OpenAI error: {}", e.getMessage());
+} catch (RateLimitException e) {
+    // Rate limit excedido
+    log.warn("Rate limit exceeded, retrying...");
+}
+
+Streaming de respuestas:
+
+Para respuestas largas, usa streaming:
+
+Flux<String> stream = chatClient.stream(message);
+stream.subscribe(
+    chunk -> System.out.print(chunk),
+    error -> log.error("Error: {}", error),
+    () -> System.out.println("\nCompleted")
+);
+
+Recursos adicionales:
+
+- Documentación oficial: https://docs.spring.io/spring-ai/
+- GitHub: https://github.com/spring-projects/spring-ai
+- Ejemplos: https://github.com/spring-projects/spring-ai-examples
+- Community: Spring AI Discord

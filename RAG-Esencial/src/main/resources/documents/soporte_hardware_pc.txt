@@ -1,0 +1,325 @@
+GUÍA DE SOPORTE TÉCNICO - HARDWARE DE PC
+==========================================
+
+DIAGNÓSTICO Y REPARACIÓN DE HARDWARE
+
+1. PC NO ENCIENDE
+-----------------
+Síntomas: Sin señales de vida, sin luces, sin ventiladores
+
+Diagnóstico paso a paso:
+
+Paso 1: Verificar fuente de alimentación
+- Cable de poder conectado correctamente
+- Interruptor de la fuente en posición ON (I)
+- Probar con otro cable de poder
+- Verificar voltaje del tomacorriente
+- Probar fuente con clip de papel (método paperclip test)
+
+Paso 2: Verificar conexiones internas
+- Abrir case con cuidado
+- Verificar cable de 24 pines a motherboard
+- Verificar cable de 4/8 pines de CPU
+- Verificar botón de encendido conectado
+- Verificar RAM bien insertada
+
+Paso 3: Prueba mínima
+- Desconectar todo excepto:
+  * Fuente de poder
+  * Motherboard
+  * CPU
+  * 1 módulo de RAM
+  * Teclado
+- Intentar encender
+- Si enciende: Agregar componentes uno por uno
+
+Paso 4: Verificar POST
+- Escuchar beeps del speaker
+- 1 beep corto: POST exitoso
+- Beeps continuos: Problema con RAM
+- 3 beeps largos: Problema con video
+- Sin beeps: Problema con motherboard o CPU
+
+Soluciones comunes:
+- Resetear CMOS: Quitar batería 5 minutos
+- Verificar standoffs del motherboard
+- Limpiar contactos de RAM con goma de borrar
+- Verificar CPU bien instalado
+- Reemplazar fuente de poder
+
+2. PC ENCIENDE PERO NO HAY VIDEO
+---------------------------------
+Síntomas: Ventiladores giran, luces encienden, pero pantalla negra
+
+Diagnóstico:
+- Verificar monitor encendido y cable conectado
+- Probar con otro monitor o cable
+- Verificar entrada correcta seleccionada (HDMI, DisplayPort, VGA)
+- Escuchar beeps de error
+
+Soluciones:
+- Reinsertar tarjeta gráfica
+- Limpiar contactos de GPU con goma de borrar
+- Probar con video integrado (si disponible)
+- Verificar cable de alimentación PCIe de GPU
+- Reinsertar RAM
+- Resetear BIOS (quitar batería CMOS)
+- Verificar CPU bien instalado con pasta térmica
+
+3. SOBRECALENTAMIENTO
+---------------------
+Síntomas: Apagados repentinos, throttling, ruido excesivo de ventiladores
+
+Temperaturas normales:
+- CPU en reposo: 30-45°C
+- CPU bajo carga: 60-80°C
+- GPU en reposo: 30-50°C
+- GPU bajo carga: 65-85°C
+
+Causas:
+- Polvo acumulado
+- Pasta térmica seca
+- Ventiladores no funcionan
+- Flujo de aire inadecuado
+- Overclock excesivo
+
+Soluciones:
+- Limpiar polvo con aire comprimido
+- Reemplazar pasta térmica (cada 2-3 años)
+- Verificar ventiladores funcionan
+- Mejorar flujo de aire del case
+- Agregar ventiladores adicionales
+- Verificar que cooler esté bien montado
+- Reducir voltajes de overclock
+- Verificar que ventiladores giren en dirección correcta
+
+Herramientas de monitoreo:
+- HWMonitor: Temperaturas en tiempo real
+- Core Temp: Temperatura de CPU
+- MSI Afterburner: Temperatura de GPU
+- SpeedFan: Control de ventiladores
+
+4. PROBLEMAS CON RAM
+--------------------
+Síntomas: Pantallas azules, errores aleatorios, PC no inicia
+
+Diagnóstico:
+- Ejecutar Windows Memory Diagnostic: mdsched.exe
+- Usar MemTest86: Bootear desde USB, dejar correr 8+ horas
+- Probar módulos uno por uno
+- Probar en diferentes slots
+
+Errores comunes:
+- RAM no compatible con motherboard
+- Velocidad incorrecta en BIOS
+- Voltaje incorrecto
+- Dual channel mal configurado
+
+Soluciones:
+- Verificar compatibilidad en QVL del motherboard
+- Limpiar contactos con goma de borrar
+- Insertar firmemente hasta escuchar click
+- Configurar XMP/DOCP en BIOS
+- Actualizar BIOS para mejor compatibilidad
+- Reemplazar módulos defectuosos
+- Verificar voltaje correcto (1.35V para DDR4, 1.2V para DDR5)
+
+5. DISCO DURO FALLA
+-------------------
+Síntomas: Ruidos extraños, archivos corruptos, lentitud extrema
+
+Señales de fallo inminente:
+- Clicks o chirridos (HDD)
+- Archivos desaparecen
+- Errores de lectura/escritura
+- SMART warnings
+- Sectores dañados
+
+Diagnóstico:
+- CrystalDiskInfo: Verificar estado SMART
+- chkdsk C: /f /r: Verificar y reparar errores
+- HD Tune: Escaneo de superficie
+- Verificar cables SATA
+
+Soluciones:
+- Backup inmediato de datos importantes
+- Reemplazar disco si SMART indica fallo
+- Verificar cables y conexiones
+- Actualizar firmware del disco
+- Verificar temperatura del disco
+- Para SSD: Verificar espacio libre (mínimo 10%)
+
+Migración a SSD:
+- Clonar disco con Macrium Reflect o Clonezilla
+- Instalar Windows limpio en SSD
+- Usar SSD para sistema, HDD para almacenamiento
+
+6. TARJETA GRÁFICA NO FUNCIONA
+-------------------------------
+Síntomas: Artefactos visuales, pantallazos, bajo rendimiento
+
+Diagnóstico:
+- Verificar temperatura con MSI Afterburner
+- Probar con otro monitor/cable
+- Actualizar drivers con DDU (Display Driver Uninstaller)
+- Benchmark con 3DMark o FurMark
+
+Problemas comunes:
+- Drivers desactualizados o corruptos
+- Sobrecalentamiento
+- Fuente de poder insuficiente
+- Slot PCIe sucio
+- Fallo de hardware
+
+Soluciones:
+- Limpiar con aire comprimido
+- Reemplazar pasta térmica de GPU
+- Verificar ventiladores de GPU funcionan
+- Usar DDU para limpiar drivers completamente
+- Instalar drivers más recientes
+- Verificar cables de alimentación PCIe bien conectados
+- Probar en otro slot PCIe
+- Verificar fuente tiene suficiente potencia
+- Reducir overclock si está aplicado
+
+7. FUENTE DE PODER INSUFICIENTE
+--------------------------------
+Síntomas: Apagados durante juegos, reinicios aleatorios, componentes no funcionan
+
+Cálculo de potencia necesaria:
+- CPU: 65-150W
+- GPU: 150-350W
+- Motherboard: 50-80W
+- RAM: 3W por módulo
+- Discos: 5-10W cada uno
+- Ventiladores: 2-5W cada uno
+- Margen de seguridad: +20%
+
+Ejemplo:
+- CPU (125W) + GPU (250W) + Resto (100W) = 475W
+- Con margen: 475W × 1.2 = 570W
+- Recomendado: Fuente de 600W o más
+
+Verificación:
+- Usar calculadora de PSU online
+- Verificar certificación 80+ (Bronze, Gold, Platinum)
+- Verificar amperaje en riel +12V
+- Probar con otra fuente conocida
+
+Soluciones:
+- Reemplazar por fuente de mayor potencia
+- Verificar todos los cables conectados
+- No usar adaptadores molex a PCIe
+- Usar cables modulares correctos
+
+8. PROBLEMAS CON MOTHERBOARD
+-----------------------------
+Síntomas: Componentes no detectados, USB no funciona, errores POST
+
+Diagnóstico:
+- Verificar LED de diagnóstico
+- Escuchar códigos de beep
+- Verificar display de código POST (si tiene)
+- Probar con componentes mínimos
+
+Problemas comunes:
+- BIOS desactualizado
+- Batería CMOS agotada
+- Capacitores hinchados
+- Pines doblados en socket
+- Cortocircuito con case
+
+Soluciones:
+- Actualizar BIOS desde USB
+- Reemplazar batería CMOS (CR2032)
+- Verificar standoffs correctamente instalados
+- Limpiar contactos con alcohol isopropílico
+- Verificar no hay tornillos sueltos causando corto
+- Resetear BIOS a defaults
+- Verificar jumpers en posición correcta
+
+9. RUIDOS ANORMALES
+-------------------
+Tipos de ruidos:
+
+Click-click-click:
+- Disco duro fallando
+- Backup inmediato y reemplazar
+
+Zumbido constante:
+- Bobinas de la fuente (coil whine)
+- Normal pero molesto
+- Reemplazar fuente si es muy fuerte
+
+Chirrido agudo:
+- Ventilador con rodamiento gastado
+- Lubricar o reemplazar ventilador
+
+Vibración:
+- Ventilador desbalanceado
+- Tornillos flojos
+- Ajustar o reemplazar
+
+Soluciones:
+- Identificar fuente del ruido
+- Detener ventiladores uno por uno
+- Lubricar ventiladores con aceite 3-en-1
+- Ajustar tornillos del case
+- Usar pads anti-vibración
+- Reemplazar componentes ruidosos
+
+10. MANTENIMIENTO PREVENTIVO
+-----------------------------
+Cada mes:
+- Verificar temperaturas
+- Limpiar filtros de polvo
+- Verificar actualizaciones de BIOS/firmware
+
+Cada 3 meses:
+- Limpieza profunda con aire comprimido
+- Verificar ventiladores funcionan correctamente
+- Revisar cables organizados
+
+Cada año:
+- Reemplazar pasta térmica
+- Verificar estado de discos duros
+- Limpiar contactos de RAM y GPU
+- Verificar batería CMOS
+
+Cada 2-3 años:
+- Considerar upgrade de componentes
+- Reemplazar ventiladores gastados
+- Verificar capacitores del motherboard
+
+HERRAMIENTAS NECESARIAS
+-----------------------
+Hardware:
+- Destornilladores (Phillips, plano)
+- Pinzas antiestáticas
+- Pulsera antiestática
+- Aire comprimido
+- Alcohol isopropílico
+- Pasta térmica de calidad
+- Multímetro (para diagnóstico avanzado)
+
+Software:
+- HWMonitor: Temperaturas
+- CrystalDiskInfo: Salud de discos
+- MemTest86: Prueba de RAM
+- Prime95: Stress test de CPU
+- FurMark: Stress test de GPU
+- CPU-Z: Información de CPU
+- GPU-Z: Información de GPU
+
+SEGURIDAD
+---------
+1. Desconectar cable de poder antes de abrir
+2. Usar pulsera antiestática
+3. Trabajar en superficie no conductiva
+4. No forzar componentes
+5. Verificar polaridad de conectores
+6. No tocar componentes electrónicos directamente
+7. Guardar tornillos organizados
+8. Tomar fotos antes de desconectar cables
+9. Leer manual del motherboard
+10. Si no estás seguro, consultar profesional

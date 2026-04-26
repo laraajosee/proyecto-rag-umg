@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: rag-project
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5434/rag_db
+    username: rag_user
+    password: rag_password
+    driver-class-name: org.postgresql.Driver
+  
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama2
+          temperature: 0.7
+      embedding:
+        options:
+          model: nomic-embed-text
+    
+    vectorstore:
+      pgvector:
+        index-type: IVFFLAT
+        distance-type: COSINE_DISTANCE
+        dimensions: 768
+
+server:
+  port: 8080
+
+# Configuración RAG
+rag:
+  chunk-size: 500
+  chunk-overlap: 50
+  top-k: 5

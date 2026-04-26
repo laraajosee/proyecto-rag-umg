@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema RAG - Consultas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .query-section {
+            margin-bottom: 20px;
+        }
+
+        .query-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="number"] {
+            width: 100px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .response-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .response-section.active {
+            display: block;
+        }
+
+        .answer-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .answer-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .answer-text {
+            line-height: 1.8;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .metrics {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .metric-card {
+            flex: 1;
+            min-width: 150px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-card .label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .metric-card .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .sources-section {
+            margin-top: 20px;
+        }
+
+        .sources-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .source-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .source-card:hover {
+            border-color: #667eea;
+        }
+
+        .source-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .source-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .source-meta {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .source-content {
+            color: #555;
+            line-height: 1.6;
+            font-size: 14px;
+            max-height: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .source-content.expanded {
+            max-height: none;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            padding: 5px 0;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .no-evidence {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            color: #856404;
+        }
+
+        .error-box {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px;
+            border-radius: 8px;
+            color: #721c24;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            .metrics {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Sistema RAG</h1>
+            <p>Generación Aumentada por Recuperación con Spring AI</p>
+            <p style="font-size: 0.9em; margin-top: 5px;">Universidad Mariano Gálvez de Guatemala</p>
+        </div>
+
+        <div class="main-card">
+            <div class="query-section">
+                <label for="queryInput">Haz tu pregunta:</label>
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="queryInput" 
+                        placeholder="Ejemplo: ¿Qué es RAG?"
+                        onkeypress="handleKeyPress(event)"
+                    >
+                    <input 
+                        type="number" 
+                        id="topKInput" 
+                        value="5" 
+                        min="1" 
+                        max="10"
+                        title="Número de documentos a recuperar"
+                    >
+                    <button onclick="submitQuery()" id="submitBtn">
+                        Consultar
+                    </button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Procesando tu consulta...</p>
+            </div>
+
+            <div class="response-section" id="responseSection">
+                <div class="metrics" id="metrics"></div>
+                
+                <div class="answer-box">
+                    <h3>📝 Respuesta</h3>
+                    <div class="answer-text" id="answerText"></div>
+                </div>
+
+                <div class="sources-section">
+                    <h3>📚 Fuentes Utilizadas</h3>
+                    <div id="sourcesContainer"></div>
+                </div>
+            </div>
+
+            <div id="errorContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Función para manejar Enter en el input
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                submitQuery();
+            }
+        }
+
+        // Función principal para enviar la consulta
+        async function submitQuery() {
+            const query = document.getElementById('queryInput').value.trim();
+            const topK = parseInt(document.getElementById('topKInput').value);
+
+            if (!query) {
+                alert('Por favor ingresa una pregunta');
+                return;
+            }
+
+            // Mostrar loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('responseSection').classList.remove('active');
+            document.getElementById('errorContainer').innerHTML = '';
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        topK: topK
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error en la consulta');
+                }
+
+                const data = await response.json();
+                displayResponse(data);
+
+            } catch (error) {
+                displayError(error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+
+        // Función para mostrar la respuesta
+        function displayResponse(data) {
+            // Mostrar métricas
+            const metricsHtml = `
+                <div class="metric-card">
+                    <div class="label">Evidencia</div>
+                    <div class="value">${data.hasEvidence ? '✓' : '✗'}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Fuentes</div>
+                    <div class="value">${data.sources.length}</div>
+                </div>
+                <div class="metric-card">
+                    <div class="label">Latencia</div>
+                    <div class="value">${(data.latencyMs / 1000).toFixed(2)}s</div>
+                </div>
+            `;
+            document.getElementById('metrics').innerHTML = metricsHtml;
+
+            // Mostrar respuesta
+            const answerHtml = data.hasEvidence 
+                ? data.answer 
+                : `<div class="no-evidence">${data.answer}</div>`;
+            document.getElementById('answerText').innerHTML = answerHtml;
+
+            // Mostrar fuentes
+            const sourcesHtml = data.sources.map((source, index) => `
+                <div class="source-card">
+                    <div class="source-header">
+                        <span class="source-name">📄 ${source.metadata.source}</span>
+                        <span class="source-meta">Chunk ${source.metadata.chunk_index + 1} de ${source.metadata.total_chunks}</span>
+                    </div>
+                    <div class="source-content" id="source-${index}">
+                        ${source.content}
+                    </div>
+                    <button class="expand-btn" onclick="toggleSource(${index})">
+                        Ver más ▼
+                    </button>
+                </div>
+            `).join('');
+            document.getElementById('sourcesContainer').innerHTML = sourcesHtml;
+
+            // Mostrar sección de respuesta
+            document.getElementById('responseSection').classList.add('active');
+        }
+
+        // Función para expandir/contraer fuentes
+        function toggleSource(index) {
+            const element = document.getElementById(`source-${index}`);
+            element.classList.toggle('expanded');
+            
+            const button = element.nextElementSibling;
+            button.textContent = element.classList.contains('expanded') 
+                ? 'Ver menos ▲' 
+                : 'Ver más ▼';
+        }
+
+        // Función para mostrar errores
+        function displayError(message) {
+            const errorHtml = `
+                <div class="error-box">
+                    <strong>Error:</strong> ${message}
+                    <br>
+                    <small>Verifica que el servidor esté corriendo y que los documentos estén ingestados.</small>
+                </div>
+            `;
+            document.getElementById('errorContainer').innerHTML = errorHtml;
+        }
+
+        // Enfocar el input al cargar la página
+        window.onload = function() {
+            document.getElementById('queryInput').focus();
+        };
+    </script>
+</body>
+</html>

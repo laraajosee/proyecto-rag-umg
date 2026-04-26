@@ -1,0 +1,188 @@
+Evaluación y Métricas en Sistemas RAG
+
+Evaluar un sistema RAG es crucial para medir su calidad y detectar áreas de mejora. A diferencia de sistemas tradicionales, RAG requiere evaluar tanto la recuperación como la generación.
+
+Métricas de Recuperación (Retrieval):
+
+1. Precision@k:
+   - Proporción de documentos relevantes entre los k recuperados
+   - Fórmula: (Documentos relevantes recuperados) / k
+   - Ejemplo: Si recuperas 5 docs y 4 son relevantes, Precision@5 = 0.8
+
+2. Recall@k:
+   - Proporción de documentos relevantes que fueron recuperados
+   - Fórmula: (Documentos relevantes recuperados) / (Total de documentos relevantes)
+   - Importante cuando hay muchos documentos relevantes
+
+3. Mean Reciprocal Rank (MRR):
+   - Mide qué tan alto aparece el primer resultado relevante
+   - Fórmula: 1 / (Posición del primer resultado relevante)
+   - Ejemplo: Si el primer relevante está en posición 3, MRR = 1/3 = 0.33
+
+4. Normalized Discounted Cumulative Gain (NDCG):
+   - Considera el orden y la relevancia de todos los resultados
+   - Penaliza resultados relevantes que aparecen más abajo
+   - Rango: 0 a 1 (1 = perfecto)
+
+Métricas de Generación:
+
+1. Faithfulness (Fidelidad):
+   - ¿La respuesta está basada en el contexto recuperado?
+   - ¿El modelo inventó información?
+   - Crítico para evitar alucinaciones
+
+2. Answer Relevance (Relevancia de respuesta):
+   - ¿La respuesta realmente responde la pregunta?
+   - ¿Es útil para el usuario?
+
+3. Context Relevance (Relevancia del contexto):
+   - ¿Los documentos recuperados son relevantes para la pregunta?
+   - ¿Hay información innecesaria?
+
+4. Groundedness:
+   - ¿Cada afirmación en la respuesta tiene soporte en el contexto?
+   - Similar a faithfulness pero más estricto
+
+Métricas de Rendimiento:
+
+1. Latencia:
+   - Tiempo total de respuesta (retrieval + generation)
+   - Objetivo típico: < 2 segundos
+   - Componentes: tiempo de embedding, búsqueda, generación
+
+2. Throughput:
+   - Consultas por segundo que el sistema puede manejar
+   - Importante para sistemas en producción
+
+3. Costo:
+   - Costo por consulta (API calls, compute)
+   - Incluye: embeddings, búsqueda, generación
+   - Ejemplo: OpenAI cobra por tokens procesados
+
+Evaluación Manual vs Automática:
+
+Manual:
+- Humanos evalúan la calidad de las respuestas
+- Más preciso pero costoso y lento
+- Útil para establecer baseline
+
+Automática:
+- Usa métricas y modelos para evaluar
+- Rápido y escalable
+- Puede usar LLMs como evaluadores
+
+Frameworks de evaluación:
+
+1. RAGAS (RAG Assessment):
+   - Framework específico para evaluar RAG
+   - Incluye faithfulness, answer relevance, context relevance
+   - Usa LLMs para evaluación automática
+
+2. TruLens:
+   - Evaluación y observabilidad para LLM apps
+   - Tracking de métricas en tiempo real
+   - Visualización de resultados
+
+3. LangSmith:
+   - Plataforma de LangChain para evaluación
+   - Permite crear datasets de evaluación
+   - Tracking de experimentos
+
+Creación de datasets de evaluación:
+
+Un buen dataset incluye:
+- Preguntas representativas del uso real
+- Respuestas esperadas (ground truth)
+- Documentos relevantes conocidos
+- Casos edge (preguntas difíciles, ambiguas)
+
+Ejemplo de entrada de evaluación:
+
+{
+  "question": "¿Qué es RAG?",
+  "expected_answer": "RAG es una técnica que combina...",
+  "relevant_docs": ["doc1.pdf", "doc2.pdf"],
+  "difficulty": "easy"
+}
+
+Proceso de evaluación:
+
+1. Crear dataset de evaluación (50-100 preguntas)
+2. Ejecutar el sistema RAG sobre el dataset
+3. Calcular métricas automáticas
+4. Revisar manualmente una muestra
+5. Identificar patrones de errores
+6. Iterar y mejorar
+
+Experimentos A/B:
+
+Para comparar configuraciones:
+
+Experimento 1: Chunk size
+- Configuración A: chunk_size = 300
+- Configuración B: chunk_size = 500
+- Métrica: Precision@5, latencia
+
+Experimento 2: Top-k
+- Configuración A: top_k = 3
+- Configuración B: top_k = 5
+- Métrica: Recall, costo
+
+Experimento 3: Modelo de embeddings
+- Configuración A: text-embedding-ada-002
+- Configuración B: text-embedding-3-small
+- Métrica: Precision, costo, latencia
+
+Análisis de errores comunes:
+
+1. Retrieval failures:
+   - No se recuperan documentos relevantes
+   - Causa: Embeddings de baja calidad, chunking inadecuado
+   - Solución: Mejorar chunking, probar otros modelos
+
+2. Hallucinations:
+   - El modelo inventa información
+   - Causa: Prompt inadecuado, contexto insuficiente
+   - Solución: Mejorar prompt, aumentar top-k
+
+3. Irrelevant answers:
+   - La respuesta no responde la pregunta
+   - Causa: Contexto irrelevante, prompt confuso
+   - Solución: Mejorar retrieval, clarificar prompt
+
+4. Incomplete answers:
+   - La respuesta es correcta pero incompleta
+   - Causa: Contexto insuficiente
+   - Solución: Aumentar top-k o chunk size
+
+Monitoreo en producción:
+
+Métricas a trackear:
+- Latencia p50, p95, p99
+- Tasa de error
+- Costo por consulta
+- Satisfacción del usuario (thumbs up/down)
+- Queries sin respuesta ("no sé")
+
+Alertas:
+- Latencia > 5 segundos
+- Tasa de error > 5%
+- Costo diario > presupuesto
+- Caída en satisfacción del usuario
+
+Mejora continua:
+
+1. Recopilar feedback de usuarios
+2. Analizar queries fallidas
+3. Agregar casos al dataset de evaluación
+4. Experimentar con mejoras
+5. Medir impacto
+6. Desplegar si hay mejora significativa
+
+Herramientas útiles:
+
+- Weights & Biases: Tracking de experimentos
+- MLflow: Gestión de modelos y experimentos
+- Prometheus + Grafana: Monitoreo de métricas
+- Sentry: Tracking de errores
+- PostHog: Analytics de producto

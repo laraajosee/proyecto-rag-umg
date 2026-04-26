@@ -1,0 +1,54 @@
+¿Qué es RAG (Retrieval-Augmented Generation)?
+
+RAG es una técnica de inteligencia artificial que combina la recuperación de información con la generación de texto. En lugar de que un modelo de lenguaje responda únicamente basándose en su entrenamiento, RAG permite que el modelo acceda a una base de conocimientos externa para proporcionar respuestas más precisas y actualizadas.
+
+Componentes principales de RAG:
+
+1. Retriever (Recuperador): Este componente busca información relevante en una base de datos o conjunto de documentos. Utiliza técnicas de búsqueda semántica para encontrar los fragmentos más relevantes según la consulta del usuario.
+
+2. Generator (Generador): Un modelo de lenguaje grande (LLM) que toma la información recuperada y genera una respuesta coherente y contextualizada.
+
+3. Base de Conocimientos: Una colección de documentos, artículos, o datos que el sistema puede consultar. Esta base se indexa usando embeddings vectoriales para permitir búsquedas eficientes.
+
+Ventajas de RAG:
+
+- Reduce las alucinaciones: Al basar las respuestas en documentos reales, el modelo es menos propenso a inventar información.
+- Actualización sin reentrenamiento: Se pueden agregar nuevos documentos sin necesidad de reentrenar el modelo completo.
+- Trazabilidad: Es posible citar las fuentes utilizadas para generar cada respuesta.
+- Especialización: Permite crear sistemas expertos en dominios específicos sin entrenar modelos desde cero.
+
+Proceso típico de RAG:
+
+1. El usuario hace una pregunta
+2. La pregunta se convierte en un embedding (representación vectorial)
+3. Se buscan los documentos más similares en la base vectorial
+4. Los documentos recuperados se agregan al contexto del prompt
+5. El LLM genera una respuesta basada en ese contexto
+6. Se retorna la respuesta junto con las fuentes utilizadas
+
+Aplicaciones comunes:
+
+- Chatbots empresariales que responden sobre políticas internas
+- Asistentes de documentación técnica
+- Sistemas de preguntas y respuestas sobre bases de conocimiento específicas
+- Análisis de documentos legales o médicos
+
+Desafíos de RAG:
+
+- Calidad del chunking: Dividir documentos de manera óptima es crucial
+- Relevancia de la recuperación: El retriever debe encontrar los fragmentos correctos
+- Tamaño del contexto: Los LLMs tienen límites en cuánto texto pueden procesar
+- Latencia: Cada consulta requiere búsqueda + generación, lo que puede ser lento
+- Costo: Cada llamada al LLM tiene un costo asociado
+
+RAG vs Fine-tuning:
+
+RAG es preferible cuando:
+- Los datos cambian frecuentemente
+- Se necesita trazabilidad de las fuentes
+- El presupuesto para entrenamiento es limitado
+
+Fine-tuning es mejor cuando:
+- Se necesita cambiar el estilo o comportamiento del modelo
+- Los datos son estables y no cambian
+- Se requiere máxima velocidad de inferencia

@@ -1,0 +1,39 @@
+Embeddings: Representaciones Vectoriales de Texto
+
+Los embeddings son representaciones numéricas de texto en un espacio vectorial de alta dimensión. Cada palabra, frase o documento se convierte en un vector de números que captura su significado semántico.
+
+¿Cómo funcionan los embeddings?
+
+Los modelos de embeddings están entrenados para que textos con significados similares tengan vectores cercanos en el espacio vectorial. Por ejemplo, las palabras "perro" y "gato" tendrían vectores más cercanos entre sí que "perro" y "automóvil".
+
+Modelos populares de embeddings:
+
+1. Word2Vec: Uno de los primeros modelos exitosos, desarrollado por Google
+2. GloVe: Global Vectors for Word Representation
+3. BERT: Bidirectional Encoder Representations from Transformers
+4. OpenAI text-embedding-ada-002: Modelo actual de OpenAI con 1536 dimensiones
+5. text-embedding-3-small: Versión más reciente y eficiente
+
+Propiedades importantes:
+
+- Dimensionalidad: Número de componentes en el vector (típicamente 768, 1536, etc.)
+- Similitud coseno: Métrica para medir qué tan similares son dos vectores
+- Contexto: Los embeddings modernos capturan el contexto de las palabras
+
+Aplicaciones de embeddings:
+
+- Búsqueda semántica: Encontrar documentos relevantes por significado, no solo palabras clave
+- Clasificación de texto: Categorizar documentos automáticamente
+- Detección de similitud: Identificar textos duplicados o relacionados
+- Sistemas de recomendación: Sugerir contenido similar
+- RAG: Base fundamental para recuperar información relevante
+
+Ventajas sobre búsqueda tradicional:
+
+La búsqueda por palabras clave solo encuentra coincidencias exactas. Los embeddings permiten encontrar documentos semánticamente relacionados incluso si usan palabras diferentes. Por ejemplo, una búsqueda de "automóvil" también encontraría documentos sobre "coche" o "vehículo".
+
+Consideraciones técnicas:
+
+- Los embeddings deben generarse con el mismo modelo para ser comparables
+- La calidad del embedding afecta directamente la calidad del retrieval
+- Diferentes modelos son mejores para diferentes idiomas o dominios

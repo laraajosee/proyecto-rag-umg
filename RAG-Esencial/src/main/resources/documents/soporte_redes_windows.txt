@@ -1,0 +1,322 @@
+GUÍA DE SOPORTE TÉCNICO - REDES EN WINDOWS
+===========================================
+
+DIAGNÓSTICO DE PROBLEMAS DE RED
+
+1. COMANDOS BÁSICOS DE DIAGNÓSTICO
+-----------------------------------
+
+ipconfig
+- Muestra configuración IP actual
+- ipconfig /all - Información detallada
+- ipconfig /release - Libera dirección IP
+- ipconfig /renew - Renueva dirección IP
+- ipconfig /flushdns - Limpia caché DNS
+
+ping
+- Verifica conectividad a un host
+- ping 8.8.8.8 - Prueba conexión a internet
+- ping google.com - Prueba resolución DNS
+- ping 192.168.1.1 - Prueba conexión al router
+- ping -t [dirección] - Ping continuo
+
+tracert
+- Rastrea ruta a un destino
+- tracert google.com - Muestra todos los saltos
+- Identifica dónde falla la conexión
+
+nslookup
+- Verifica resolución DNS
+- nslookup google.com - Consulta DNS
+- nslookup google.com 8.8.8.8 - Usa DNS específico
+
+netstat
+- Muestra conexiones activas
+- netstat -an - Todas las conexiones y puertos
+- netstat -b - Muestra programas usando red
+- netstat -r - Muestra tabla de enrutamiento
+
+pathping
+- Combina ping y tracert
+- pathping google.com - Análisis detallado de ruta
+
+2. NO HAY CONEXIÓN A INTERNET
+------------------------------
+
+Diagnóstico paso a paso:
+
+Paso 1: Verificar hardware
+- Cable Ethernet conectado correctamente
+- Luces del router encendidas
+- WiFi habilitado en el dispositivo
+- Modo avión desactivado
+
+Paso 2: Verificar IP
+- Abrir CMD: ipconfig
+- Verificar dirección IP válida (no 169.254.x.x)
+- Si es 169.254.x.x: DHCP no funciona
+
+Paso 3: Probar conectividad local
+- ping 192.168.1.1 (o IP del router)
+- Si falla: problema con router o adaptador
+- Si funciona: problema con internet del ISP
+
+Paso 4: Probar DNS
+- ping 8.8.8.8
+- Si funciona pero ping google.com falla: problema DNS
+- Cambiar DNS a 8.8.8.8 y 8.8.4.4
+
+Paso 5: Verificar gateway
+- ipconfig /all
+- Anotar "Puerta de enlace predeterminada"
+- ping [puerta de enlace]
+
+Soluciones comunes:
+- Reiniciar router: Desconectar 30 segundos
+- Reiniciar adaptador de red
+- Liberar y renovar IP: ipconfig /release, ipconfig /renew
+- Restablecer Winsock: netsh winsock reset
+- Restablecer TCP/IP: netsh int ip reset
+- Deshabilitar IPv6 si causa problemas
+- Actualizar drivers del adaptador de red
+
+3. CONEXIÓN LENTA
+-----------------
+
+Causas comunes:
+- Ancho de banda saturado
+- Interferencia WiFi
+- Malware consumiendo red
+- Drivers desactualizados
+- Configuración incorrecta
+
+Diagnóstico:
+- Probar velocidad: speedtest.net
+- Verificar uso de red: Administrador de tareas > Rendimiento > Red
+- Identificar programas: Administrador de tareas > Procesos > Red
+
+Soluciones:
+- Cerrar programas que usan mucha red
+- Cambiar canal WiFi (menos congestionado)
+- Acercar dispositivo al router
+- Usar cable Ethernet en lugar de WiFi
+- Actualizar firmware del router
+- Escanear malware con Malwarebytes
+- Deshabilitar actualizaciones automáticas temporalmente
+- Configurar QoS en el router
+- Verificar plan de internet contratado
+
+4. WIFI SE DESCONECTA FRECUENTEMENTE
+-------------------------------------
+
+Causas:
+- Señal débil
+- Interferencia
+- Ahorro de energía
+- Driver desactualizado
+- Conflicto de IP
+
+Soluciones:
+- Deshabilitar ahorro de energía del adaptador:
+  * Administrador de dispositivos > Adaptadores de red
+  * Propiedades > Administración de energía
+  * Desmarcar "Permitir que el equipo apague este dispositivo"
+
+- Cambiar configuración de energía:
+  * Panel de control > Opciones de energía
+  * Cambiar configuración del plan > Configuración avanzada
+  * Configuración del adaptador inalámbrico > Modo de ahorro de energía > Rendimiento máximo
+
+- Actualizar drivers del adaptador WiFi
+- Cambiar canal del router (1, 6 u 11 para 2.4GHz)
+- Usar banda de 5GHz si está disponible
+- Olvidar red y reconectar
+- Deshabilitar IPv6
+- Configurar IP estática
+
+5. NO PUEDE ACCEDER A CARPETAS COMPARTIDAS
+-------------------------------------------
+
+Verificaciones:
+- Ambos equipos en la misma red
+- Descubrimiento de red habilitado
+- Compartir archivos e impresoras habilitado
+- Credenciales correctas
+
+Soluciones:
+- Habilitar descubrimiento de red:
+  * Panel de control > Redes e Internet > Centro de redes
+  * Cambiar configuración de uso compartido avanzado
+  * Activar descubrimiento de red
+  * Activar compartir archivos e impresoras
+
+- Verificar servicios:
+  * services.msc
+  * Verificar que estén iniciados:
+    - Estación de trabajo
+    - Servidor
+    - Explorador de equipos
+    - Publicación de recursos de detección de funciones
+
+- Verificar firewall:
+  * Permitir "Compartir archivos e impresoras"
+  * Agregar excepción para red privada
+
+- Acceder por IP:
+  * \\192.168.1.100 en lugar de \\NOMBRE-PC
+
+- Verificar permisos de carpeta compartida
+- Agregar credenciales: Administrador de credenciales
+
+6. VPN NO CONECTA
+-----------------
+
+Errores comunes:
+- Error 800: No se puede establecer conexión
+- Error 619: No se puede conectar al servidor
+- Error 807: Conexión interrumpida
+
+Soluciones:
+- Verificar credenciales correctas
+- Verificar conexión a internet funciona
+- Deshabilitar firewall temporalmente
+- Verificar configuración de VPN:
+  * Tipo de VPN correcto (PPTP, L2TP, IKEv2)
+  * Servidor VPN correcto
+  * Puertos abiertos en firewall
+
+- Reinstalar adaptador VPN:
+  * Administrador de dispositivos > Adaptadores de red
+  * Desinstalar adaptadores VPN
+  * Reiniciar y reinstalar
+
+- Usar cliente VPN del proveedor
+- Verificar que el servicio VPN esté iniciado
+
+7. PROBLEMAS CON DNS
+--------------------
+
+Síntomas:
+- Ping a IP funciona pero a nombres no
+- Páginas web no cargan
+- Error "No se puede resolver el nombre del servidor"
+
+Soluciones:
+- Limpiar caché DNS: ipconfig /flushdns
+- Cambiar servidores DNS:
+  * Panel de control > Redes e Internet > Conexiones de red
+  * Propiedades del adaptador > IPv4 > Propiedades
+  * Usar las siguientes direcciones de servidor DNS:
+    - Preferido: 8.8.8.8 (Google)
+    - Alternativo: 8.8.4.4 (Google)
+    - O usar 1.1.1.1 y 1.0.0.1 (Cloudflare)
+
+- Verificar archivo hosts:
+  * C:\Windows\System32\drivers\etc\hosts
+  * Eliminar entradas sospechosas
+
+- Reiniciar servicio DNS Client:
+  * services.msc > Cliente DNS > Reiniciar
+
+8. CONFIGURAR IP ESTÁTICA
+--------------------------
+
+Cuándo usar:
+- Servidores locales
+- Impresoras de red
+- Dispositivos que necesitan puerto forwarding
+- Problemas con DHCP
+
+Pasos:
+1. Obtener información actual:
+   - ipconfig /all
+   - Anotar: Dirección IP, Máscara de subred, Puerta de enlace, DNS
+
+2. Configurar IP estática:
+   - Panel de control > Redes e Internet > Conexiones de red
+   - Click derecho en adaptador > Propiedades
+   - IPv4 > Propiedades
+   - Seleccionar "Usar la siguiente dirección IP"
+   - Ingresar:
+     * Dirección IP: 192.168.1.100 (ejemplo, fuera del rango DHCP)
+     * Máscara de subred: 255.255.255.0
+     * Puerta de enlace: 192.168.1.1
+     * DNS preferido: 8.8.8.8
+     * DNS alternativo: 8.8.4.4
+
+3. Verificar conectividad:
+   - ping 8.8.8.8
+   - ping google.com
+
+9. FIREWALL DE WINDOWS
+----------------------
+
+Verificar estado:
+- Panel de control > Sistema y seguridad > Firewall de Windows
+- Verificar que esté activado
+
+Permitir aplicación:
+- Firewall de Windows > Permitir una aplicación
+- Cambiar configuración
+- Permitir otra aplicación
+- Seleccionar aplicación y redes (Privada/Pública)
+
+Crear regla personalizada:
+- Firewall de Windows > Configuración avanzada
+- Reglas de entrada/salida > Nueva regla
+- Seleccionar tipo (Programa, Puerto, Predefinida)
+- Configurar según necesidad
+
+Puertos comunes:
+- HTTP: 80
+- HTTPS: 443
+- FTP: 21
+- SSH: 22
+- RDP: 3389
+- SMB: 445
+- DNS: 53
+
+10. SOLUCIÓN DE PROBLEMAS AVANZADOS
+------------------------------------
+
+Restablecer red completamente:
+1. Abrir CMD como administrador
+2. Ejecutar en orden:
+   netsh winsock reset
+   netsh int ip reset
+   ipconfig /release
+   ipconfig /renew
+   ipconfig /flushdns
+3. Reiniciar equipo
+
+Verificar tabla de enrutamiento:
+- route print
+- Verificar ruta predeterminada (0.0.0.0)
+
+Verificar adaptadores:
+- Administrador de dispositivos
+- Ver dispositivos ocultos
+- Desinstalar adaptadores fantasma
+
+Logs de red:
+- Visor de eventos > Registros de Windows > Sistema
+- Filtrar por origen: Tcpip, DHCP-Client
+
+Herramientas adicionales:
+- Wireshark: Captura de paquetes
+- NetAdapter Repair: Reparación automática
+- TCP Optimizer: Optimización de red
+- Angry IP Scanner: Escaneo de red
+
+MEJORES PRÁCTICAS
+-----------------
+1. Mantener drivers actualizados
+2. Usar contraseñas seguras en WiFi (WPA3 o WPA2)
+3. Cambiar contraseña predeterminada del router
+4. Actualizar firmware del router regularmente
+5. Deshabilitar WPS si no se usa
+6. Usar cable Ethernet para equipos fijos
+7. Configurar red como "Privada" en casa
+8. Habilitar firewall siempre
+9. Documentar configuración de red
+10. Hacer backup de configuración del router
